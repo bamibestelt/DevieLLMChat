@@ -1,0 +1,19 @@
+version: '1'
+services:
+  rabbitmq:
+    image: 'rabbitmq:latest'
+  rss-processor:
+    build: ./RSSBlogProcessor
+    depends_on:
+      - rabbitmq
+  llm-engine:
+    build: ./LLMEngine
+    depends_on:
+      - rabbitmq
+      - rss-processor
+  llm-comm-api:
+    build: ./LLMCommApi
+    depends_on:
+      - rabbitmq
+      - llm-engine
+
