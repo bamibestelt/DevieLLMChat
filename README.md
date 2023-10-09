@@ -17,7 +17,7 @@ docker run -d --net=host rss-processor
 
 environment variables to set:
 ENV RABBIT_HOST="localhost"
-ENV RSS_LINK=""
+ENV RSS_LINK="https://deviesdevelopment.github.io/blog/posts/index.xml"
 
 
 LLMEngine
