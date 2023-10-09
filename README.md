@@ -7,6 +7,11 @@ This integration consists of 4 layers:
 3. API service: manages communication with the front-end and translate them into commands and requests to LLM layer.
 4. Frontend: UI interface in which user interacts with the system through prompts, commands and data. 
 
+Links for references:
+https://github.com/imartinez/privateGPT
+https://github.com/langchain-ai/langchain
+https://github.com/nomic-ai/gpt4all
+https://github.com/Yidadaa/ChatGPT-Next-Web
 
 
 Components:
