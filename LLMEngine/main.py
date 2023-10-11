@@ -1,8 +1,8 @@
 import argparse
 import threading
 
-from privateGPT import PrivateGPT
 from rabbit import start_listen_prompt, start_listen_data_update_request
+from test import test_data_update_request
 
 
 def listen_to_ingestion_request():
@@ -15,9 +15,7 @@ def listen_to_ingestion_request():
                 break
             if query.strip() == "":
                 continue
-            # start_blog_links_request()
-            PrivateGPT().init_llm_qa()
-            PrivateGPT().qa_prompt("what is a software")
+            test_data_update_request()
         return
     else:
         print("start listening to requests")

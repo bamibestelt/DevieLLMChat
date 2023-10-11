@@ -4,24 +4,9 @@ import chromadb
 from chromadb.api.segment import API
 from constants import PERSIST_DIRECTORY, CHROMA_SETTINGS, EMBEDDINGS_MODEL_NAME, CHUNK_SIZE, CHUNK_OVERLAP
 from langchain.docstore.document import Document
-from langchain.document_loaders import AsyncHtmlLoader, AsyncChromiumLoader
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import Chroma
-
-
-def parse_coda_pages(links: List[str]) -> List[Document]:
-    loader = AsyncChromiumLoader(links)
-    docs = loader.load()
-    print("decoding coda pages success")
-    return docs
-
-
-def parse_blog_document(links: List[str]) -> List[Document]:
-    loader = AsyncHtmlLoader(links)
-    docs = loader.load()
-    print("decoding blog rss success")
-    return docs
 
 
 def does_vectorstore_exist(persist_directory: str, embeddings: HuggingFaceEmbeddings) -> bool:
