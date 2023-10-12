@@ -34,8 +34,7 @@ export interface ChatOptions {
 }
 
 export interface DataUpdateCallback {
-  onUpdate: (message: string) => void;
-  onFinish: (message: string) => void;
+  onMessage: (message: string) => void;
   onError: (message: string) => void;
 }
 
@@ -185,6 +184,7 @@ export const api = new ClientCommApi();
 export abstract class LLMCommApi {
   abstract chat(options: ChatOptions): Promise<void>;
   abstract update(callback: DataUpdateCallback): Promise<void>;
+  abstract models(): Promise<LLMModel[]>;
 }
 
 

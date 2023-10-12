@@ -382,24 +382,30 @@ export class ChatClientApi implements LLMCommApi {
     console.log('send data update request');
 
     const apiUrl = this.path() + "/update";
-    let tempStatus = ""
-
-    axios.post(apiUrl).then((response: AxiosResponse) => {
+    const source = axios.CancelToken.source();
+    
+    axios.post(apiUrl, {}, { cancelToken: source.token })
+    .then((response: AxiosResponse) => {
       if (response.status === 200) {
-        console.log('response data update request:', response.data);
-        tempStatus = response.data.status;
-        callback.onUpdate?.(tempStatus);
-        
-        delay(1000)
+        console.log('data update request: success');
+        const eventSource = new EventSource('/api/events/sse');
 
-        if(tempStatus != "finish") {
-          console.log('keep request for data update status');
-          this.update(callback)
-        } else {
-          console.log('data update proces finished');
-          callback.onFinish?.(tempStatus);
-        }
+        eventSource.onmessage = (event) => {
+          const jsonMessage = event.data;
+          const statusData = JSON.parse(jsonMessage)
+          console.log('Received message: ' + statusData.status_message);
+          callback.onMessage?.(statusData.status_message)
+        };
 
+        eventSource.onerror = (error) => {
+          console.error('Error occurred: ' + error);
+          callback.onError?.('error streaming status')
+        };
+
+        return () => {
+          eventSource.close();
+          source.cancel('Component unmounted');
+        };
       } else {
         console.log('received status code:', response.status);
         callback.onError?.(`err response status: ${response.status}`)

@@ -1020,20 +1020,15 @@ function _Chat() {
 
   // request for data update
   function startFetchingDataUpdateTask() {
-    setDataUpdateStatus("started fetching...")
-    
+    // send request to update data
     api.llm.update({
-      onUpdate(message) {
+      onMessage(message) {
         setDataUpdateStatus(message)
       },
-      onFinish(message) {
+      onError(message) {
         setDataUpdateStatus(message)
       },
-      onError(errorMsg) {
-        setDataUpdateStatus(errorMsg)
-        console.error("[Chat] failed ", errorMsg);
-      },
-    });
+    })
   }
 
   // remember unfinished input
@@ -1091,7 +1086,6 @@ function _Chat() {
               bordered
               title={"Update Data"}
               onClick={() => {
-                // TODO
                 startFetchingDataUpdateTask()
               }}
             />

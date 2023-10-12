@@ -23,14 +23,13 @@ def process_documents(documents: List[Document], ignored_files: List[str] = []) 
     """
     Load documents and split in chunks
     """
-    # print(f"source: {doc.metadata['source']}")
     print(f"persistence. total docs: {len(documents)}")
     print(f"persistence. ignored files: {ignored_files}")
     docs = [doc for doc in documents if doc.metadata['source'] not in ignored_files]
     print(f"persistence. docs to be saved: {len(docs)}")
     if not docs:
         print("No new documents to load")
-        exit(0)
+        return docs
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP)
     documents = text_splitter.split_documents(documents)
     print(f"Split into {len(documents)} chunks of text (max. {CHUNK_SIZE} tokens each)")
@@ -61,9 +60,11 @@ def persist_documents(texts: List[Document]):
         print(f"Creating embeddings. May take some minutes...")
         collection = db.get()
         documents = process_documents(texts, [metadata['source'] for metadata in collection['metadatas']])
-        print(f"Creating embeddings. May take some minutes...")
-        for batched_chromadb_insertion in batch_chromadb_insertions(chroma_client, documents):
-            db.add_documents(batched_chromadb_insertion)
+
+        if documents:
+            print(f"Creating embeddings. May take some minutes...")
+            for batched_chromadb_insertion in batch_chromadb_insertions(chroma_client, documents):
+                db.add_documents(batched_chromadb_insertion)
     else:
         # Create and store locally vectorstore
         print("Creating new vectorstore")

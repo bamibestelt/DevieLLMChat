@@ -1,5 +1,6 @@
 using LLMCommApi.Repositories;
 using LLMCommApi.Settings;
+using LLMCommApi.Workers;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors(options =>
@@ -9,8 +10,9 @@ builder.Services.AddCors(options =>
 builder.Services.Configure<LLMCommSettings>(builder.Configuration.GetSection("RabbitMQ"));
 
 // Add services to the container.
-builder.Services.AddSingleton<ILLMEngineRepository, LLMEngineRepository>();
+builder.Services.AddSingleton<ILlmEngineRepository, LlmEngineRepository>();
 builder.Services.AddControllers();
+builder.Services.AddHostedService<LlmStatusWorker>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

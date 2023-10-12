@@ -2,8 +2,10 @@ using LLMCommApi.Entities;
 
 namespace LLMCommApi.Repositories;
 
-public interface ILLMEngineRepository
+public interface ILlmEngineRepository
 {
     Task<PromptReply> PostPromptAsync(Prompt prompt);
-    Task<DataUpdateStatus> RequestDataUpdateAsync();
+    Task RequestDataUpdateAsync();
+    Task ConsumeLlmStatus();
+    string LlmStatusJson { get; set; }
 }

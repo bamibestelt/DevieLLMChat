@@ -93,19 +93,6 @@ export const useUpdateStore = createPersistStore(
       set(() => ({
         lastUpdateUsage: Date.now(),
       }));
-
-      try {
-        const usage = await api.llm.usage();
-
-        if (usage) {
-          set(() => ({
-            used: usage.used,
-            subscription: usage.total,
-          }));
-        }
-      } catch (e) {
-        console.error((e as Error).message);
-      }
     },
   }),
   {

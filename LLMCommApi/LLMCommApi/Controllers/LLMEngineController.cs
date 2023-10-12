@@ -1,26 +1,22 @@
+using System.Text;
 using LLMCommApi.Dto;
 using LLMCommApi.Entities;
 using LLMCommApi.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace LLMCommApi.Controllers;
 
 
-/**
-* API endpoints:
-* POST Question ===> Result: Answer
-* POST Data Update ===> Result: Status
-*/
-
 [ApiController]
 [Route("llm")]
-public class LLMEngineController : ControllerBase
+public class LlmEngineController : ControllerBase
 {
-    private readonly ILogger<LLMEngineController> _logger;
-    private readonly ILLMEngineRepository _repository;
+    private readonly ILogger<LlmEngineController> _logger;
+    private readonly ILlmEngineRepository _repository;
 
     
-    public LLMEngineController(ILogger<LLMEngineController> logger, ILLMEngineRepository repository)
+    public LlmEngineController(ILogger<LlmEngineController> logger, ILlmEngineRepository repository)
     {
         _logger = logger;
         _repository = repository;
@@ -45,14 +41,47 @@ public class LLMEngineController : ControllerBase
     
     
     [HttpPost("update")]
-    public async Task<DataUpdateStatus> RequestDataUpdateAsync()
+    public async Task<IActionResult> RequestDataUpdateAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("RequestDataUpdateAsync");
         
-        // todo ping-pong from and until certain status
-        var status = await _repository.RequestDataUpdateAsync();
-        Console.WriteLine($"status: {status.Status}");
+        await _repository.RequestDataUpdateAsync();
         
-        return status;
+        Response.ContentType = "text/event-stream";
+        Response.Headers.Add("Cache-Control", "no-cache");
+        var tempStatusCode = 0;
+        
+        try
+        {
+            while (tempStatusCode > -1)
+            {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    break;
+                }
+
+                var statusJson = _repository.LlmStatusJson;
+                Console.WriteLine(statusJson);
+                
+                var status = JsonConvert.DeserializeObject<LlmStatus>(statusJson);
+                tempStatusCode = status?.Code ?? -1;
+                
+                var data = Encoding.UTF8.GetBytes(statusJson);
+                await Response.Body.WriteAsync(data, cancellationToken);
+                await Response.Body.FlushAsync(cancellationToken);
+                
+                await Task.Delay(1000, cancellationToken);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Cancellation token was triggered, so we stop sending events
+        }
+        finally
+        {
+            Response.Body.Close();
+        }
+
+        return Ok();
     }
 }

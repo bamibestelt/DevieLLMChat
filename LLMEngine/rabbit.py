@@ -7,7 +7,7 @@ from constants import RABBIT_HOST, LLM_UPDATE_QUEUE, LLM_STATUS_QUEUE, BLOG_RSS,
     PROMPT_QUEUE, LLM_REPLY_QUEUE
 from persistence import persist_documents
 from privateGPT import PrivateGPT
-from utils import parse_blog_document
+from utils import parse_blog_document, LLMStatusCode, get_llm_status
 
 is_updating_data = False
 
@@ -50,7 +50,7 @@ def data_update_request_receiver(channel, method, properties, body):
     is_updating_data = True
     request = body.decode('utf-8')
     print(f"data-update request: {request}")
-    publish_message('start', LLM_STATUS_QUEUE)
+    publish_message(get_llm_status(LLMStatusCode.START), LLM_STATUS_QUEUE)
     blog_links_thread = threading.Thread(target=start_links_request)
     blog_links_thread.start()
     blog_links_thread.join()
@@ -60,7 +60,7 @@ def data_update_request_receiver(channel, method, properties, body):
 # send data request to blog rss processor
 # listening to reply
 def start_links_request():
-    publish_message('get-rss', LLM_STATUS_QUEUE)
+    publish_message(get_llm_status(LLMStatusCode.GET_RSS), LLM_STATUS_QUEUE)
     publish_message(BLOG_RSS, BLOG_LINKS_REQUEST)
     print('Listening to blog processor reply...')
     consume_message(BLOG_LINKS_REPLY, links_receiver)
@@ -73,13 +73,13 @@ def links_receiver(channel, method, properties, body):
     print(f"Links data received: {len(links)}")
     channel.stop_consuming()
 
-    publish_message('parse blog documents', LLM_STATUS_QUEUE)
+    publish_message(get_llm_status(LLMStatusCode.PARSING), LLM_STATUS_QUEUE)
     docs = parse_blog_document(links)
 
-    publish_message('saving the docs', LLM_STATUS_QUEUE)
+    publish_message(get_llm_status(LLMStatusCode.SAVING), LLM_STATUS_QUEUE)
     persist_documents(docs)
 
-    publish_message('finish', LLM_STATUS_QUEUE)
+    publish_message(get_llm_status(LLMStatusCode.FINISH), LLM_STATUS_QUEUE)
 
     global is_updating_data
     is_updating_data = False

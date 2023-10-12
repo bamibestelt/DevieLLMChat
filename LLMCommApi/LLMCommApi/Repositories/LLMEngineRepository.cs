@@ -1,5 +1,4 @@
 using System.Text;
-using System.Text.Json;
 using LLMCommApi.Entities;
 using LLMCommApi.Settings;
 using Microsoft.Extensions.Options;
@@ -8,16 +7,16 @@ using RabbitMQ.Client.Events;
 
 namespace LLMCommApi.Repositories;
 
-public class LLMEngineRepository : ILLMEngineRepository
+public class LlmEngineRepository : ILlmEngineRepository
 {
     
     private readonly LLMCommSettings _commSettings;
+    private EventingBasicConsumer _consumer;
     private IConnection _connection;
     private IModel _channel;
-    private EventingBasicConsumer _consumer;
     
     
-    public LLMEngineRepository(IOptions<LLMCommSettings> commSettings)
+    public LlmEngineRepository(IOptions<LLMCommSettings> commSettings)
     {
         _commSettings = commSettings.Value;
         InitConnection();
@@ -75,49 +74,19 @@ public class LLMEngineRepository : ILLMEngineRepository
     }
 
     
-    public Task<DataUpdateStatus> RequestDataUpdateAsync()
+    public async Task RequestDataUpdateAsync()
     {
-        var taskCompletionSource = new TaskCompletionSource<DataUpdateStatus>();
         var requestQueue = _commSettings.LLMUpdateQueue;
-        var replyQueue = _commSettings.LLMStatusQueue;
-        
-        if(!_connection.IsOpen) InitConnection();
-        _channel.QueueDeclare(queue: replyQueue, durable: false, exclusive: false, autoDelete: false, arguments: null);
-        
-        // listens to reply
-        _consumer = new EventingBasicConsumer(_channel);
-        _consumer.Received += (_, e) =>
-        {
-            var status = Encoding.UTF8.GetString(e.Body.ToArray());
-            Console.WriteLine($"received from {replyQueue}: {status}");
-            
-            var dataUpdateStatus = new DataUpdateStatus
-            {
-                Status = status,
-                CreatedDate = DateTimeOffset.Now
-            };
-            
-            Dispose();
-            taskCompletionSource.SetResult(dataUpdateStatus);
-        };
-        _channel.BasicConsume(
-            queue: replyQueue,
-            autoAck: true,
-            consumer: _consumer
-        );
-        Console.WriteLine($"consumer started for {replyQueue}");
-        
-        SendMessage("all-data-source-param", requestQueue, replyQueue);
-        
-        return taskCompletionSource.Task;
+        SendMessage("all-data-source-param", requestQueue);
     }
 
 
-    private void SendMessage(string prompt, string requestQueue, string replyQueue)
+    private void SendMessage(string prompt, string requestQueue, string replyQueue = "")
     {
         var messageBytes = Encoding.UTF8.GetBytes(prompt);
         var props = _channel.CreateBasicProperties();
-        props.ReplyTo = replyQueue;
+        if(replyQueue.Length > 0)
+            props.ReplyTo = replyQueue;
         _channel.BasicPublish(
             exchange: "",
             routingKey: requestQueue,
@@ -126,8 +95,36 @@ public class LLMEngineRepository : ILLMEngineRepository
         );
         Console.WriteLine($"publish message to {requestQueue}");
     }
-    
-    
+
+
+    public async Task ConsumeLlmStatus()
+    {
+        var statusQueue = _commSettings.LLMStatusQueue;
+        
+        if(!_connection.IsOpen) InitConnection();
+        _channel.QueueDeclare(queue: statusQueue, durable: false, 
+            exclusive: false, autoDelete: false, arguments: null);
+        
+        _consumer = new EventingBasicConsumer(_channel);
+        _consumer.Received += (_, e) =>
+        {
+            var status = Encoding.UTF8.GetString(e.Body);
+            Console.WriteLine($"received from {statusQueue}: {status}");
+            LlmStatusJson = status;
+        };
+        
+        _channel.BasicConsume(
+            queue: statusQueue,
+            autoAck: true,
+            consumer: _consumer
+        );
+        
+        Console.WriteLine($"consumer started for {statusQueue}");
+    }
+
+    public string LlmStatusJson { get; set; }
+
+
     private void Dispose()
     {
         _channel.Dispose();
