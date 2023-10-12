@@ -1,82 +1,111 @@
-import time
+from operator import itemgetter
+from typing import Sequence
 
 import chromadb
-from langchain.chains import RetrievalQA
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.llms import GPT4All, LlamaCpp
+from langchain.prompts import (ChatPromptTemplate, MessagesPlaceholder,
+                               PromptTemplate)
+from langchain.schema import Document
+from langchain.schema.language_model import BaseLanguageModel
+from langchain.schema.output_parser import StrOutputParser
+from langchain.schema.retriever import BaseRetriever
+from langchain.schema.runnable import Runnable, RunnableMap
 from langchain.vectorstores import Chroma
 
 from constants import CHROMA_SETTINGS, EMBEDDINGS_MODEL_NAME, PERSIST_DIRECTORY, TARGET_SOURCE_CHUNKS, MODEL_TYPE, \
     MODEL_N_BATCH, MODEL_N_CTX, MODEL_PATH
+from utils import REPHRASE_TEMPLATE, RESPONSE_TEMPLATE
 
 
-class PrivateGPT:
-    _instance = None
-    _retrievalQA = None
+def get_retriever() -> BaseRetriever:
+    embeddings = HuggingFaceEmbeddings(model_name=EMBEDDINGS_MODEL_NAME)
+    print('embeddings obtained...')
 
-    def __new__(cls, *args, **kwargs):
-        if not cls._instance:
-            cls._instance = super(PrivateGPT, cls).__new__(cls, *args, **kwargs)
-        return cls._instance
+    chroma_client = chromadb.PersistentClient(settings=CHROMA_SETTINGS, path=PERSIST_DIRECTORY)
+    db = Chroma(persist_directory=PERSIST_DIRECTORY, embedding_function=embeddings, client_settings=CHROMA_SETTINGS,
+                client=chroma_client)
+    print('chromadb client obtained...')
+    retriever = db.as_retriever(search_kwargs={"k": TARGET_SOURCE_CHUNKS})
+    print('vector store retriever obtained...')
+    return retriever
 
-    def init_llm_qa(self):
-        if self._retrievalQA is not None:
-            return
 
-        print('RetrievalQA is null. LLM initialization started...')
+def create_retriever_chain(
+    llm: BaseLanguageModel, retriever: BaseRetriever, use_chat_history: bool
+) -> Runnable:
+    CONDENSE_QUESTION_PROMPT = PromptTemplate.from_template(REPHRASE_TEMPLATE)
+    if not use_chat_history:
+        initial_chain = (itemgetter("question")) | retriever
+        return initial_chain
+    else:
+        condense_question_chain = (
+            {
+                "question": itemgetter("question"),
+                "chat_history": itemgetter("chat_history"),
+            }
+            | CONDENSE_QUESTION_PROMPT
+            | llm
+            | StrOutputParser()
+        ).with_config(
+            run_name="CondenseQuestion",
+        )
+        conversation_chain = condense_question_chain | retriever
+        return conversation_chain
 
-        embeddings = HuggingFaceEmbeddings(model_name=EMBEDDINGS_MODEL_NAME)
-        print('embeddings initialized...')
 
-        chroma_client = chromadb.PersistentClient(settings=CHROMA_SETTINGS, path=PERSIST_DIRECTORY)
-        db = Chroma(persist_directory=PERSIST_DIRECTORY, embedding_function=embeddings, client_settings=CHROMA_SETTINGS,
-                    client=chroma_client)
-        print('chromadb client initialized...')
-        retriever = db.as_retriever(search_kwargs={"k": TARGET_SOURCE_CHUNKS})
-        print('vector store retriever obtained...')
+def format_docs(docs: Sequence[Document]) -> str:
+    formatted_docs = []
+    for i, doc in enumerate(docs):
+        doc_string = f"<doc id='{i}'>{doc.page_content}</doc>"
+        formatted_docs.append(doc_string)
+    return "\n".join(formatted_docs)
 
-        # activate/deactivate the streaming StdOut callback for LLMs
-        callbacks = []  # if args.mute_stream else [StreamingStdOutCallbackHandler()]
-        # Prepare the LLM
-        match MODEL_TYPE:
-            case "LlamaCpp":
-                llm = LlamaCpp(model_path=MODEL_PATH,
-                               max_tokens=MODEL_N_CTX,
-                               n_batch=MODEL_N_BATCH,
-                               callbacks=callbacks,
-                               verbose=False)
-            case "GPT4All":
-                llm = GPT4All(model=MODEL_PATH,
-                              max_tokens=MODEL_N_CTX,
-                              backend='gptj',
-                              n_batch=MODEL_N_BATCH,
-                              callbacks=callbacks,
-                              verbose=False)
-            case _default:
-                # raise exception if model_type is not supported
-                raise Exception(f"Model type {MODEL_TYPE} is not supported."
-                                f"Please choose one of the following: LlamaCpp, GPT4All")
 
-        self._retrievalQA = RetrievalQA.from_chain_type(llm=llm,
-                                                        chain_type="stuff",
-                                                        retriever=retriever,
-                                                        return_source_documents=False)
-        print('LLM ready!')
+def create_chain(
+    llm: BaseLanguageModel,
+    retriever: BaseRetriever,
+    use_chat_history: bool = False,
+) -> Runnable:
+    retriever_chain = create_retriever_chain(
+        llm, retriever, use_chat_history
+    ).with_config(run_name="FindDocs")
+    _context = RunnableMap(
+        {
+            "context": retriever_chain | format_docs,
+            "question": itemgetter("question"),
+            "chat_history": itemgetter("chat_history"),
+        }
+    ).with_config(run_name="RetrieveDocs")
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            ("system", RESPONSE_TEMPLATE),
+            MessagesPlaceholder(variable_name="chat_history"),
+            ("human", "{question}"),
+        ]
+    )
 
-    def qa_prompt(self, prompt: str) -> str:
-        # Check for RetrievalQA state
-        if self._retrievalQA is None:
-            # need to restart init_llm_qa and post init process to client
-            self.init_llm_qa()
+    response_synthesizer = (prompt | llm | StrOutputParser()).with_config(
+        run_name="GenerateResponse",
+    )
+    return _context | response_synthesizer
 
-        print(f"Query prompt: {prompt}")
-        # Get the answer from the chain
-        start = time.time()
-        res = self._retrievalQA(prompt)
-        answer, docs = res['result'], []  # if args.hide_source else res['source_documents']
-        end = time.time()
 
-        time_seconds = round(end - start, 2)
-        print(f"LLM reply: {answer}")
-        reply = f"{answer}\n\ntime:{time_seconds}"
-        return reply
+def get_llm() -> BaseLanguageModel:
+    global llm
+    llm = None
+    match MODEL_TYPE:
+        case "LlamaCpp":
+            llm = LlamaCpp(model_path=MODEL_PATH,
+                           max_tokens=MODEL_N_CTX,
+                           n_batch=MODEL_N_BATCH,
+                           callbacks=[],
+                           verbose=False)
+        case "GPT4All":
+            llm = GPT4All(model=MODEL_PATH,
+                          max_tokens=MODEL_N_CTX,
+                          backend='gptj',
+                          n_batch=MODEL_N_BATCH,
+                          callbacks=[],
+                          verbose=False)
+    return llm

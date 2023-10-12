@@ -3,10 +3,8 @@ import threading
 
 import pika
 
-from constants import RABBIT_HOST, LLM_UPDATE_QUEUE, LLM_STATUS_QUEUE, BLOG_RSS, BLOG_LINKS_REQUEST, BLOG_LINKS_REPLY, \
-    PROMPT_QUEUE, LLM_REPLY_QUEUE
+from constants import RABBIT_HOST, LLM_UPDATE_QUEUE, LLM_STATUS_QUEUE, BLOG_RSS, BLOG_LINKS_REQUEST, BLOG_LINKS_REPLY
 from persistence import persist_documents
-from privateGPT import PrivateGPT
 from utils import parse_blog_document, LLMStatusCode, get_llm_status
 
 is_updating_data = False
@@ -31,11 +29,6 @@ def consume_message(target_queue: str, target_callback: ()):
     channel.start_consuming()
 
 
-# listen to data update request.
-# if a signal is captured, then it will send signal to processors
-# it will wait for processors' reply and data
-# ingest the data and keep updating the status to client
-# channels: LLM_UPDATE_QUEUE & LLM_STATUS_QUEUE
 def start_listen_data_update_request():
     print('Listening to data-update request...')
     consume_message(LLM_UPDATE_QUEUE, data_update_request_receiver)
@@ -84,16 +77,3 @@ def links_receiver(channel, method, properties, body):
     global is_updating_data
     is_updating_data = False
 
-
-def start_listen_prompt():
-    # need to add broker credentials
-    print('Listening to prompt. To exit press CTRL+C')
-    consume_message(PROMPT_QUEUE, prompt_receiver)
-
-
-def prompt_receiver(channel, method, properties, body):
-    prompt = body.decode('utf-8')
-    print(f"Prompt received: {prompt}")
-    reply = PrivateGPT().qa_prompt(prompt)
-    publish_message(reply, LLM_REPLY_QUEUE)
-    print('LLM reply sent')

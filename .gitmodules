@@ -1,0 +1,3 @@
+[submodule "chat-langchain"]
+	path = chat-langchain
+	url = git@github.com:bamibestelt/chat-langchain.git
