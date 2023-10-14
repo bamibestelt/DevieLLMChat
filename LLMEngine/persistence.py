@@ -2,11 +2,12 @@ from typing import List
 
 import chromadb
 from chromadb.api.segment import API
-from constants import PERSIST_DIRECTORY, CHROMA_SETTINGS, EMBEDDINGS_MODEL_NAME, CHUNK_SIZE, CHUNK_OVERLAP
 from langchain.docstore.document import Document
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import Chroma
+
+from constants import PERSIST_DIRECTORY, CHROMA_SETTINGS, EMBEDDINGS_MODEL_NAME, CHUNK_SIZE, CHUNK_OVERLAP
 
 
 def does_vectorstore_exist(persist_directory: str, embeddings: HuggingFaceEmbeddings) -> bool:
@@ -24,7 +25,7 @@ def process_documents(documents: List[Document], ignored_files: List[str] = []) 
     Load documents and split in chunks
     """
     print(f"persistence. total docs: {len(documents)}")
-    print(f"persistence. ignored files: {ignored_files}")
+    # print(f"persistence. ignored files: {ignored_files}")
     docs = [doc for doc in documents if doc.metadata['source'] not in ignored_files]
     print(f"persistence. docs to be saved: {len(docs)}")
     if not docs:

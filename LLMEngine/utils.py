@@ -23,6 +23,7 @@ class LLMStatusCode(Enum):
     PARSING = 2
     SAVING = 3
     FINISH = -1
+    IDLE = -2
 
 
 def get_llm_status_message(code):
@@ -32,6 +33,7 @@ def get_llm_status_message(code):
         LLMStatusCode.PARSING: "parsing",
         LLMStatusCode.SAVING: "saving",
         LLMStatusCode.FINISH: "finish",
+        LLMStatusCode.IDLE: "idle",
     }.get(code, "unknown")
 
 

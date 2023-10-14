@@ -1,5 +1,6 @@
 import argparse
 import json
+import time
 from typing import AsyncIterator
 
 from fastapi import FastAPI
@@ -10,6 +11,7 @@ from langchain.callbacks.tracers.log_stream import RunLogPatch
 from langchain.schema.messages import AIMessage, HumanMessage
 
 from privateGPT import get_retriever, create_chain, get_llm
+from rabbit import start_data_update_request, provide_status_stream
 from utils import ChatRequest
 
 app = FastAPI()
@@ -69,6 +71,20 @@ async def chat_endpoint(request: ChatRequest):
     )
 
 
+def dynamic_data_generator():
+    while True:
+        # Replace the following line with your dynamic data generation logic
+        data = time.ctime()
+        yield f'data: {data}\n\n'
+        time.sleep(1)
+
+
+@app.post("/update")
+async def update_endpoint():
+    start_data_update_request()
+    return StreamingResponse(provide_status_stream(), media_type='text/event-stream')
+
+
 def start_llm_service():
     args = parse_arguments()
     if args.t:
@@ -102,4 +118,3 @@ def parse_arguments():
 
 if __name__ == '__main__':
     start_llm_service()
-
