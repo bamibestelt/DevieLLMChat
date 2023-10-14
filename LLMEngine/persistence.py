@@ -79,8 +79,4 @@ def persist_documents(texts: List[Document]):
         for batched_chromadb_insertion in batched_chromadb_insertions:
             db.add_documents(batched_chromadb_insertion)
 
-    # try to initialize llm
-    # if already active, restart
-    # PrivateGPT().init_llm_qa()
-
     print(f"Ingestion complete! You can now run GPT to query your documents")

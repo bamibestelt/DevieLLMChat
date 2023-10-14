@@ -1,6 +1,5 @@
 import argparse
 import json
-import time
 from typing import AsyncIterator
 
 from fastapi import FastAPI
@@ -24,6 +23,10 @@ app.add_middleware(
     expose_headers=["*"],
 )
 
+llm = None
+retriever = None
+has_initialized_llm = False
+
 
 async def transform_stream_for_client(
     stream: AsyncIterator[RunLogPatch],
@@ -35,8 +38,9 @@ async def transform_stream_for_client(
 
 @app.post("/chat")
 async def chat_endpoint(request: ChatRequest):
-    global trace_url
-    trace_url = None
+    global llm
+    global retriever
+    global has_initialized_llm
     question = request.message
     chat_history = request.history or []
     converted_chat_history = []
@@ -50,8 +54,12 @@ async def chat_endpoint(request: ChatRequest):
         "conversation_id": request.conversation_id,
     }
 
-    llm = get_llm()
-    retriever = get_retriever()
+    if not has_initialized_llm:
+        llm = get_llm()
+        retriever = get_retriever()
+        has_initialized_llm = True
+        print('new llm created')
+
     answer_chain = create_chain(
         llm,
         retriever,
@@ -69,14 +77,6 @@ async def chat_endpoint(request: ChatRequest):
         transform_stream_for_client(stream),
         headers={"Content-Type": "text/event-stream"},
     )
-
-
-def dynamic_data_generator():
-    while True:
-        # Replace the following line with your dynamic data generation logic
-        data = time.ctime()
-        yield f'data: {data}\n\n'
-        time.sleep(1)
 
 
 @app.post("/update")

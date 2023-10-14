@@ -32,21 +32,21 @@ def get_retriever() -> BaseRetriever:
 
 
 def create_retriever_chain(
-    llm: BaseLanguageModel, retriever: BaseRetriever, use_chat_history: bool
+        model: BaseLanguageModel, retriever: BaseRetriever, use_chat_history: bool
 ) -> Runnable:
-    CONDENSE_QUESTION_PROMPT = PromptTemplate.from_template(REPHRASE_TEMPLATE)
+    condense_question_prompt = PromptTemplate.from_template(REPHRASE_TEMPLATE)
     if not use_chat_history:
         initial_chain = (itemgetter("question")) | retriever
         return initial_chain
     else:
         condense_question_chain = (
-            {
-                "question": itemgetter("question"),
-                "chat_history": itemgetter("chat_history"),
-            }
-            | CONDENSE_QUESTION_PROMPT
-            | llm
-            | StrOutputParser()
+                {
+                    "question": itemgetter("question"),
+                    "chat_history": itemgetter("chat_history"),
+                }
+                | condense_question_prompt
+                | model
+                | StrOutputParser()
         ).with_config(
             run_name="CondenseQuestion",
         )
@@ -63,12 +63,12 @@ def format_docs(docs: Sequence[Document]) -> str:
 
 
 def create_chain(
-    llm: BaseLanguageModel,
-    retriever: BaseRetriever,
-    use_chat_history: bool = False,
+        model: BaseLanguageModel,
+        retriever: BaseRetriever,
+        use_chat_history: bool = False,
 ) -> Runnable:
     retriever_chain = create_retriever_chain(
-        llm, retriever, use_chat_history
+        model, retriever, use_chat_history
     ).with_config(run_name="FindDocs")
     _context = RunnableMap(
         {
@@ -84,15 +84,13 @@ def create_chain(
             ("human", "{question}"),
         ]
     )
-
-    response_synthesizer = (prompt | llm | StrOutputParser()).with_config(
+    response_synthesizer = (prompt | model | StrOutputParser()).with_config(
         run_name="GenerateResponse",
     )
     return _context | response_synthesizer
 
 
 def get_llm() -> BaseLanguageModel:
-    global llm
     llm = None
     match MODEL_TYPE:
         case "LlamaCpp":
