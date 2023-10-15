@@ -4,8 +4,7 @@ from typing import Sequence
 import chromadb
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.llms import GPT4All, LlamaCpp
-from langchain.prompts import (ChatPromptTemplate, MessagesPlaceholder,
-                               PromptTemplate)
+from langchain.prompts import (ChatPromptTemplate, PromptTemplate)
 from langchain.schema import Document
 from langchain.schema.language_model import BaseLanguageModel
 from langchain.schema.output_parser import StrOutputParser
@@ -15,7 +14,7 @@ from langchain.vectorstores import Chroma
 
 from constants import CHROMA_SETTINGS, EMBEDDINGS_MODEL_NAME, PERSIST_DIRECTORY, TARGET_SOURCE_CHUNKS, MODEL_TYPE, \
     MODEL_N_BATCH, MODEL_N_CTX, MODEL_PATH
-from utils import REPHRASE_TEMPLATE, RESPONSE_TEMPLATE
+from utils import REPHRASE_TEMPLATE
 
 
 def get_retriever() -> BaseRetriever:
@@ -79,8 +78,6 @@ def create_chain(
     ).with_config(run_name="RetrieveDocs")
     prompt = ChatPromptTemplate.from_messages(
         [
-            ("system", RESPONSE_TEMPLATE),
-            MessagesPlaceholder(variable_name="chat_history"),
             ("human", "{question}"),
         ]
     )
