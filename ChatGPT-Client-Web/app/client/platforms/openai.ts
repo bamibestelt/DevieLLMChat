@@ -10,11 +10,10 @@ import { ChatOptions, DataUpdateCallback, getHeaders, getSimpleHeaders, LLMApi, 
 import Locale from "../../locales";
 import {
   EventStreamContentType,
-  fetchEventSource,
 } from "@fortaine/fetch-event-source";
 import { prettyObject } from "@/app/utils/format";
 import { getClientConfig } from "@/app/config/client";
-import axios, { AxiosResponse, AxiosError } from 'axios';
+import { fetchEventSource } from "@microsoft/fetch-event-source";
 
 export interface OpenAIListModelResponse {
   object: string;
@@ -286,10 +285,9 @@ export class ChatGPTApi implements LLMApi {
 
 // simple api interface
 export class ChatClientApi implements LLMCommApi {
-  private disableListModels = true;
 
   path(): string {
-    return "https://localhost:7186/llm";
+    return "http://0.0.0.0:8080/";
   }
 
   extractMessage(res: any) {
@@ -297,131 +295,88 @@ export class ChatClientApi implements LLMCommApi {
   }
 
   async chat(options: ChatOptions) {
-    const messages = options.messages.map((v) => ({
-      PromptText: v.content,
-    }));
+    // construct prompt request from ChatOptions model
+    const conversations = options.messages.map((v) => v.content);
 
-    const modelConfig = {
-      ...useAppConfig.getState().modelConfig,
-      ...useChatStore.getState().currentSession().mask.modelConfig,
-      ...{
-        model: options.config.model,
-      },
-    };
-
-    console.log("[Request] openai payload: ", messages);
-    const lastPrompt = (messages.length > 0) ? messages[messages.length - 1] : messages[0]
-    console.log("propmt to be sent: ", messages);
+    // for the time being we only send the current prompt
+    // the rest of conversation can go into chat_history in future
+    const newestPrompt = (conversations.length > 0) ? conversations[conversations.length - 1] : conversations[0]
+    console.log("prompt to be sent: ", newestPrompt);
 
     const controller = new AbortController();
     options.onController?.(controller);
 
+    const payload = {
+      message: newestPrompt,
+      //history: conversations
+    }
+
     try {
-      const chatPath = this.path() + "/prompt";
-      const chatPayload = {
+      const chatPayload = JSON.stringify(payload);
+      const apiUrl = this.path() + "chat";
+
+      console.log('POST chat');
+      fetchEventSource(apiUrl, {
         method: "POST",
-        body: JSON.stringify(lastPrompt),
-        signal: controller.signal,
-        headers: getSimpleHeaders(),
-      };
-
-      // make a fetch request
-      const requestTimeoutId = setTimeout(
-        () => controller.abort(),
-        REQUEST_TIMEOUT_MS,
-      );
-
-      let responseText = "";
-      let finished = false;
-
-      const finish = () => {
-        if (!finished) {
-          options.onFinish(responseText);
-          finished = true;
-        }
-      };
-
-      controller.signal.onabort = finish;
-
-      console.log('Send POST request with Axios');
-      axios.post(chatPath, chatPayload.body, {
         headers: {
-          'Content-Type': 'application/json',
-        }
-      }).then((response: AxiosResponse) => {
-        if (response.status === 200) {
-          const responseData = response.data;
-          console.log('Response data:', responseData);
-          responseText = responseData.reply;
-          options.onUpdate?.(responseText, '1');
-          return finish();
-        } else {
-          console.log('Received status code:', response.status);
-          return options.onError?.(Error(`response status: ${response.status}`))
-        }
-      })
-        .catch((error: AxiosError) => {
-          // Handle errors (e.g., network error, request timeout)
-          if (error.response) {
-            console.error('Error status code:', error.response.status);
-          } else if (error.request) {
-            console.error('No response received:', error.request);
-          } else {
-            console.error('Error:', error.message);
+          "Content-Type": "application/json",
+        },
+        body: chatPayload,
+        onerror(err) {
+          options.onError?.(err)
+          throw err
+        },
+        onmessage(msg) {
+          if (msg.event === "end") {
+            console.log('answer stream ended');
           }
-          return options.onError?.(error)
-        });
+          if (msg.event === "data" && msg.data) {
+            const response = JSON.parse(msg.data)
+            const operations = response["ops"]
+            const content = operations[0]
+
+            console.log('content path: ' + content.path);
+            
+            if(content.path === '/final_output') {
+              console.log('finish content');
+              options.onFinish(content.value.output);
+            } else if(content.path.includes('output')) {
+              console.log('update content');
+              options.onUpdate?.(content.value.output, content.path)
+            }
+          }
+        },
+      });
     } catch (e) {
-      console.log("[Request] failed to make a chat request", e);
+      console.log("failed to make a prompt request", e);
       options.onError?.(e as Error);
     }
   }
 
   // handle data update and show the status in the response
   async update(callback: DataUpdateCallback) {
-    console.log('send data update request');
+    const apiUrl = this.path() + "update";
 
-    const apiUrl = this.path() + "/update";
-    const source = axios.CancelToken.source();
-    
-    axios.post(apiUrl, {}, { cancelToken: source.token })
-    .then((response: AxiosResponse) => {
-      if (response.status === 200) {
-        console.log('data update request: success');
-        const eventSource = new EventSource('/api/events/sse');
-
-        eventSource.onmessage = (event) => {
-          const jsonMessage = event.data;
-          const statusData = JSON.parse(jsonMessage)
-          console.log('Received message: ' + statusData.status_message);
-          callback.onMessage?.(statusData.status_message)
-        };
-
-        eventSource.onerror = (error) => {
-          console.error('Error occurred: ' + error);
-          callback.onError?.('error streaming status')
-        };
-
-        return () => {
-          eventSource.close();
-          source.cancel('Component unmounted');
-        };
-      } else {
-        console.log('received status code:', response.status);
-        callback.onError?.(`err response status: ${response.status}`)
-      }
-    })
-      .catch((error: AxiosError) => {
-        let errorMsg = ""
-        if (error.response) {
-          errorMsg = `Error status code: ${error.response.status}`;
-        } else if (error.request) {
-          errorMsg = `No response received: ${error.request}`;
-        } else {
-          errorMsg = `Error: ${error.message}`;
+    console.log('POST update');
+    fetchEventSource(apiUrl, {
+      method: "POST",
+      onerror(err) {
+        callback.onError?.(err)
+        throw err
+      },
+      onmessage(msg) {
+        if (msg.event === "end") {
+          console.log('update stream ended.');
         }
-        callback.onError?.(errorMsg)
-      });
+        if (msg.event === "data" && msg.data) {
+          const status = JSON.parse(msg.data)
+          const code = status.status_code
+          const message = status.status_message
+          console.log('update status: ' + message);
+          callback.onMessage?.(message)
+        }
+      },
+    });
   }
 
   async usage() {
@@ -441,7 +396,7 @@ export class ChatClientApi implements LLMCommApi {
 
 function delay(milliseconds: number): Promise<void> {
   return new Promise<void>(resolve => {
-      setTimeout(resolve, milliseconds);
+    setTimeout(resolve, milliseconds);
   });
 }
 

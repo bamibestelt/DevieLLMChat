@@ -9,6 +9,16 @@ export type MessageRole = (typeof ROLES)[number];
 export const Models = ["gpt-3.5-turbo", "gpt-4"] as const;
 export type ChatModel = ModelType;
 
+export interface PromptOp {
+  op: string;
+  path: string;
+  value: string;
+}
+
+export interface PromptResponse {
+  ops: [PromptOp];
+}
+
 export interface RequestMessage {
   role: MessageRole;
   content: string;

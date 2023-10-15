@@ -509,10 +509,11 @@ export const useChatStore = createPersistStore(
           session.topic === DEFAULT_TOPIC &&
           countMessages(messages) >= SUMMARIZE_MIN_LEN
         ) {
+          /*
           const topicMessages = messages.concat(
             createMessage({
               role: "user",
-              content: Locale.Store.Prompt.Topic,
+              content: ''//Locale.Store.Prompt.Topic,
             }),
           );
           api.llm.chat({
@@ -527,7 +528,7 @@ export const useChatStore = createPersistStore(
                     message.length > 0 ? trimTopic(message) : DEFAULT_TOPIC),
               );
             },
-          });
+          });*/
         }
 
         const modelConfig = session.mask.modelConfig;
