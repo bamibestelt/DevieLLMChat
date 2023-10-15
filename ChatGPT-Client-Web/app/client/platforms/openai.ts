@@ -365,12 +365,11 @@ export class ChatClientApi implements LLMCommApi {
         throw err
       },
       onmessage(msg) {
-        if (msg.event === "end") {
+        if(msg.event === "end") {
           console.log('update stream ended.');
         }
-        if (msg.event === "data" && msg.data) {
+        if(msg.event === "data" && msg.data) {
           const status = JSON.parse(msg.data)
-          const code = status.status_code
           const message = status.status_message
           console.log('update status: ' + message);
           callback.onMessage?.(message)

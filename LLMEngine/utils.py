@@ -37,12 +37,12 @@ def get_llm_status_message(code):
     }.get(code, "unknown")
 
 
-def get_llm_status(code: LLMStatusCode) -> str:
-    status = LLMStatus(
+def get_llm_status(code: LLMStatusCode) -> dict:
+    status = dict(
         status_code=code.value,
         status_message=get_llm_status_message(code)
     )
-    return status.json()
+    return status
 
 
 def parse_blog_document(links: List[str]) -> List[Document]:

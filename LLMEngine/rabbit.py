@@ -3,7 +3,6 @@ import threading
 import time
 
 import pika
-from fastapi.encoders import jsonable_encoder
 
 from constants import RABBIT_HOST, BLOG_RSS, BLOG_LINKS_REQUEST, BLOG_LINKS_REPLY
 from persistence import persist_documents
@@ -51,12 +50,14 @@ def provide_status_stream():
             else:
                 # return the updated status
                 previous_update_status = current_update_status
+                llm_status = get_llm_status(current_update_status)
                 print(f"UpdateStatusAsyncStream: {current_update_status}")
-                yield f"event: data\ndata: {json.dumps(jsonable_encoder(get_llm_status(current_update_status)))}\n\n"
+                yield f"event: data\ndata: {json.dumps(llm_status, ensure_ascii=False)}\n\n"
                 if current_update_status == LLMStatusCode.FINISH:
                     normalize_update_status()
         else:
-            yield f"event: data\ndata: {json.dumps(jsonable_encoder(get_llm_status(current_update_status)))}\n\n"
+            llm_status = get_llm_status(current_update_status)
+            yield f"event: data\ndata: {json.dumps(llm_status, ensure_ascii=False)}\n\n"
         time.sleep(1)
 
 
