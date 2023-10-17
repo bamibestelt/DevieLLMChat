@@ -30,7 +30,7 @@ build docker image with platform flag.
 docker buildx build --platform linux/amd64 -t llm-engine .
 
 run docker image with platform flag.
-docker run --platform linux/amd64 llm-engine
+docker run -p 8080:8080 --platform linux/amd64 --volume /Users/drikviic/Documents/AI\ Stuff/DeviesLLMChat/LLMEngine/db:/home/db --volume /Users/drikviic/Documents/AI\ Stuff/models/nous-hermes-13b.ggmlv3.q4_0.bin:/home/model/nous-hermes-13b.ggmlv3.q4_0.bin --env PERSIST_DIRECTORY=/home/db --env MODEL_PATH=/home/model/nous-hermes-13b.ggmlv3.q4_0.bin -d llm-engine
 
 environment variables to set:
 ENV RABBIT_HOST="localhost"

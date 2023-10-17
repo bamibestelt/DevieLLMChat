@@ -7,22 +7,15 @@ if not load_dotenv():
     print("Could not load .env file or it is empty. Please check if it exists and is readable.")
     exit(1)
 
-RABBIT_HOST = os.environ.get('RABBIT_HOST')
+LLM_HOST_ADDRESS = os.environ.get('LLM_HOST_ADDRESS')
+LLM_PORT_ADDRESS = int(os.environ.get('LLM_PORT_ADDRESS'))
 
-# coda links channel
-CODA_LINKS_REQUEST = os.environ.get('CODA_REQUEST_QUEUE')
-CODA_LINKS_REPLY = os.environ.get('CODA_REPLY_QUEUE')
+RABBIT_HOST = os.environ.get('RABBIT_HOST')
 
 # rss blog links channel
 BLOG_LINKS_REQUEST = os.environ.get('BLOG_REQUEST_QUEUE')
 BLOG_LINKS_REPLY = os.environ.get('BLOG_REPLY_QUEUE')
 BLOG_RSS = os.environ.get('BLOG_RSS')
-
-# prompt communication channels
-PROMPT_QUEUE = os.environ.get('PROMPT_QUEUE')
-LLM_REPLY_QUEUE = os.environ.get('LLM_REPLY_QUEUE')
-LLM_UPDATE_QUEUE = os.environ.get('LLM_UPDATE_QUEUE')
-LLM_STATUS_QUEUE = os.environ.get('LLM_STATUS_QUEUE')
 
 MODEL_TYPE = os.environ.get('MODEL_TYPE')
 MODEL_PATH = os.environ.get('MODEL_PATH')

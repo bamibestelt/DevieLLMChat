@@ -1,4 +1,5 @@
 import {
+  BaseApiUrl,
   DEFAULT_API_HOST,
   DEFAULT_MODELS,
   OpenaiPath,
@@ -286,10 +287,6 @@ export class ChatGPTApi implements LLMApi {
 // simple api interface
 export class ChatClientApi implements LLMCommApi {
 
-  path(): string {
-    return "http://0.0.0.0:8080/";
-  }
-
   extractMessage(res: any) {
     return res.choices?.at(0)?.message?.content ?? "";
   }
@@ -313,7 +310,7 @@ export class ChatClientApi implements LLMCommApi {
 
     try {
       const chatPayload = JSON.stringify(payload);
-      const apiUrl = this.path() + "chat";
+      const apiUrl = BaseApiUrl + "chat";
 
       console.log('POST chat');
       fetchEventSource(apiUrl, {
@@ -355,7 +352,7 @@ export class ChatClientApi implements LLMCommApi {
 
   // handle data update and show the status in the response
   async update(callback: DataUpdateCallback) {
-    const apiUrl = this.path() + "update";
+    const apiUrl = BaseApiUrl + "update";
 
     console.log('POST update');
     fetchEventSource(apiUrl, {

@@ -16,7 +16,7 @@ RUN pip3 install --no-cache-dir -r requirements.txt
 ENV RABBIT_HOST="localhost"
 ENV BLOG_REQUEST_QUEUE="blog.request"
 ENV BLOG_REPLY_QUEUE="blog.links"
-ENV RSS_LINK=""
+ENV RSS_LINK="https://deviesdevelopment.github.io/blog/posts/index.xml"
 
 # Run main.py when the container launches
 CMD ["python3", "main.py"]

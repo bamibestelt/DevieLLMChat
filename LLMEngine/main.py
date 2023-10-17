@@ -9,6 +9,7 @@ from fastapi.responses import StreamingResponse
 from langchain.callbacks.tracers.log_stream import RunLogPatch
 from langchain.schema.messages import AIMessage, HumanMessage
 
+from constants import LLM_HOST_ADDRESS, LLM_PORT_ADDRESS
 from privateGPT import get_retriever, create_chain, get_llm
 from rabbit import start_data_update_request, provide_status_stream
 from utils import ChatRequest
@@ -100,7 +101,7 @@ def start_llm_service():
     else:
         print("live mode started")
         import uvicorn
-        uvicorn.run(app, host="0.0.0.0", port=8080)
+        uvicorn.run(app, host=LLM_HOST_ADDRESS, port=LLM_PORT_ADDRESS)
 
 
 def parse_arguments():

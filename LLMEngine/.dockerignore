@@ -71,7 +71,7 @@ docs/_build/
 target/
 
 # Virtual environment
-#.env
+.env
 .venv/
 venv/
 
@@ -87,3 +87,6 @@ venv/
 
 # VS Code
 .vscode/
+
+# generated local vector db
+db/
