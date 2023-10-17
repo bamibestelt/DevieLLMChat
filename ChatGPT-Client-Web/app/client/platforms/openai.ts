@@ -1,5 +1,4 @@
 import {
-  BaseApiUrl,
   DEFAULT_API_HOST,
   DEFAULT_MODELS,
   OpenaiPath,
@@ -15,6 +14,9 @@ import {
 import { prettyObject } from "@/app/utils/format";
 import { getClientConfig } from "@/app/config/client";
 import { fetchEventSource } from "@microsoft/fetch-event-source";
+
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 export interface OpenAIListModelResponse {
   object: string;
@@ -310,9 +312,9 @@ export class ChatClientApi implements LLMCommApi {
 
     try {
       const chatPayload = JSON.stringify(payload);
-      const apiUrl = BaseApiUrl + "chat";
+      const apiUrl = process.env.BASE_API_URL + "chat";
 
-      console.log('POST chat');
+      console.log('POST chat: ' + apiUrl);
       fetchEventSource(apiUrl, {
         method: "POST",
         headers: {
@@ -352,7 +354,7 @@ export class ChatClientApi implements LLMCommApi {
 
   // handle data update and show the status in the response
   async update(callback: DataUpdateCallback) {
-    const apiUrl = BaseApiUrl + "update";
+    const apiUrl = process.env.BASE_API_URL + "update";
 
     console.log('POST update');
     fetchEventSource(apiUrl, {

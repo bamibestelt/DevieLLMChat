@@ -49,10 +49,12 @@ to override the appsettings.json.
 ChatGPT-Client-Web
 run with: yarn dev.
 hardcoded parameter:
-api base path: https://localhost:7186/llm as stated by LLMCommApi.
+api base path: https://0.0.0.0:8080 as stated by LLMCommApi.
 original repo: https://github.com/Yidadaa/ChatGPT-Next-Web
 Read instruction in <original repo> for setup the project
 
+run docker image
+docker run -p 3000:3000 --env BASE_API_URL=http://0.0.0.0:8080/ -d chat-devies-blog
 
 
 Notes:
