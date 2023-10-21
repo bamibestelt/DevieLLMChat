@@ -17,6 +17,8 @@ https://github.com/Yidadaa/ChatGPT-Next-Web
 Components:
 
 RSSProcessor
+build dockerfile
+docker buildx build --platform linux/amd64 -t rss-processor .
 to run rss-processor
 docker run -d --net=host rss-processor
 
@@ -30,31 +32,23 @@ build docker image with platform flag.
 docker buildx build --platform linux/amd64 -t llm-engine .
 
 run docker image with platform flag.
-docker run -p 8080:8080 --platform linux/amd64 --volume /Users/drikviic/Documents/AI\ Stuff/DeviesLLMChat/LLMEngine/db:/home/db --volume /Users/drikviic/Documents/AI\ Stuff/models/nous-hermes-13b.ggmlv3.q4_0.bin:/home/model/nous-hermes-13b.ggmlv3.q4_0.bin --env PERSIST_DIRECTORY=/home/db --env MODEL_PATH=/home/model/nous-hermes-13b.ggmlv3.q4_0.bin -d llm-engine
-
-environment variables to set:
-ENV RABBIT_HOST="localhost"
-
-volumes to set:
-ENV PERSIST_DIRECTORY=""
-ENV MODEL_PATH=""
-
-
-LLMCommApi
-to run llm-comm-api
-docker run -d --net=host -e RabbitMQ_Host=localhost llm-comm-api
-to override the appsettings.json.
+docker run -p 8080:8080 --platform linux/amd64 --volume <host_folder>:<container_folder> --env MODEL_TYPE=GPT4All --env PERSIST_DIRECTORY=<container_folder>/db --env MODEL_PATH=<container_folder>/models/nous-hermes-13b.ggmlv3.q4_0.bin -d bamibestelt/llm-engine
 
 
 ChatGPT-Client-Web
 run with: yarn dev.
-hardcoded parameter:
-api base path: https://0.0.0.0:8080 as stated by LLMCommApi.
-original repo: https://github.com/Yidadaa/ChatGPT-Next-Web
-Read instruction in <original repo> for setup the project
-
 run docker image
-docker run -p 3000:3000 --env BASE_API_URL=http://0.0.0.0:8080/ -d chat-devies-blog
+docker run -p 3000:3000 --env BASE_API_URL=<remote_host_name> -d chat-devies-blog
+
+
+push new image
+docker tag image-name:tagname username/image-name:tagname
+docker push username/image-name:tagname
+
+push a new tag to repo
+docker push bamibestelt/devies-llm-integration:tagname
+docker login
+docker pull username/image-name:tagname
 
 
 Notes:

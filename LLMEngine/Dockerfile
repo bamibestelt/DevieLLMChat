@@ -16,6 +16,9 @@ RUN pip3 install --upgrade pip
 RUN pip3 install --no-cache-dir -r requirements.txt
 
 # rss blog links channel
+ENV PERSIST_DIRECTORY=""
+ENV MODEL_PATH=""
+ENV MODEL_TYPE=""
 ENV BLOG_RSS=""
 
 EXPOSE 8080
