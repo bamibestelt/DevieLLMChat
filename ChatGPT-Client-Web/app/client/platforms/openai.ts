@@ -312,7 +312,9 @@ export class ChatClientApi implements LLMCommApi {
 
     try {
       const chatPayload = JSON.stringify(payload);
-      const apiUrl = process.env.BASE_API_URL + "chat";
+      let baseApiUrl = process.env.BASE_API_URL
+      baseApiUrl = baseApiUrl ? baseApiUrl : "http://0.0.0.0:8080/"
+      const apiUrl = baseApiUrl + "chat";
 
       console.log('POST chat: ' + apiUrl);
       fetchEventSource(apiUrl, {
@@ -354,7 +356,9 @@ export class ChatClientApi implements LLMCommApi {
 
   // handle data update and show the status in the response
   async update(callback: DataUpdateCallback) {
-    const apiUrl = process.env.BASE_API_URL + "update";
+    let baseApiUrl = process.env.BASE_API_URL
+    baseApiUrl = baseApiUrl ? baseApiUrl : "http://0.0.0.0:8080/"
+    const apiUrl = baseApiUrl + "update";
 
     console.log('POST update');
     fetchEventSource(apiUrl, {

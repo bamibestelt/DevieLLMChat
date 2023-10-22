@@ -4,7 +4,6 @@ A prototype of LLM integration with company data.
 This integration consists of 4 layers:
 1. Processors: gathers data from outside source such as blogs, links, google drive, api endpoints etc. (may need to move langchain document transformation here in the processors instead of in the LLM layer).
 2. LLM: receive data from processors, turn them into documents, persist them into vector database and allows them to be queried with prompts.
-3. API service: manages communication with the front-end and translate them into commands and requests to LLM layer.
 4. Frontend: UI interface in which user interacts with the system through prompts, commands and data. 
 
 Links for references:
@@ -15,6 +14,10 @@ https://github.com/Yidadaa/ChatGPT-Next-Web
 
 
 Components:
+
+CodaProcessor
+pip install playwright
+playwright install
 
 RSSProcessor
 build dockerfile
@@ -37,8 +40,9 @@ docker run -p 8080:8080 --platform linux/amd64 --volume <host_folder>:<container
 
 ChatGPT-Client-Web
 run with: yarn dev.
+docker buildx build --platform linux/amd64 -t devies-chat-client .
 run docker image
-docker run -p 3000:3000 --env BASE_API_URL=<remote_host_name> -d chat-devies-blog
+docker run -p 3000:3000 --env BASE_API_URL=<remote_host_name> -d devies-chat-client
 
 
 push new image
