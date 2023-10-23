@@ -296,6 +296,14 @@ export class ChatClientApi implements LLMCommApi {
   async chat(options: ChatOptions) {
     // construct prompt request from ChatOptions model
     const conversations = options.messages.map((v) => v.content);
+    const chatHistory = options.messages
+      .filter((msg) => !(msg.role == "system"))
+      .map((v) => (
+        {
+          key: (v.role == "user") ? "human" : "ai",
+          value: v.content
+        }
+      ));
 
     // for the time being we only send the current prompt
     // the rest of conversation can go into chat_history in future
@@ -307,7 +315,7 @@ export class ChatClientApi implements LLMCommApi {
 
     const payload = {
       message: newestPrompt,
-      //history: conversations
+      history: chatHistory
     }
 
     try {
@@ -337,13 +345,11 @@ export class ChatClientApi implements LLMCommApi {
             const content = operations[0]
 
             console.log('content path: ' + content.path);
-            
-            if(content.path === '/final_output') {
+            const answer = content.value
+
+            if (content.path === '/final_output') {
               console.log('finish content');
-              options.onFinish(content.value.output);
-            } else if(content.path.includes('output')) {
-              console.log('update content');
-              options.onUpdate?.(content.value.output, content.path)
+              options.onFinish(checkValueType(answer));
             }
           }
         },
@@ -368,10 +374,10 @@ export class ChatClientApi implements LLMCommApi {
         throw err
       },
       onmessage(msg) {
-        if(msg.event === "end") {
+        if (msg.event === "end") {
           console.log('update stream ended.');
         }
-        if(msg.event === "data" && msg.data) {
+        if (msg.event === "data" && msg.data) {
           const status = JSON.parse(msg.data)
           const message = status.status_message
           console.log('update status: ' + message);
@@ -400,5 +406,17 @@ function delay(milliseconds: number): Promise<void> {
   return new Promise<void>(resolve => {
     setTimeout(resolve, milliseconds);
   });
+}
+
+function checkValueType(answer: any): string {
+  if (typeof answer === 'string') {
+    return answer;
+  } else {
+    if (answer.hasOwnProperty('output')) {
+      return checkValueType(answer.output)
+    } else {
+      return JSON.stringify(answer);
+    }
+  }
 }
 
