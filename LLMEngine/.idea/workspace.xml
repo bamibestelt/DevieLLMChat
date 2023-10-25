@@ -7,6 +7,7 @@
     <list default="true" id="3097ce8f-ecc6-44cc-adb1-204c3b835ee8" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/../ChatGPT-Client-Web/app/client/platforms/openai.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../ChatGPT-Client-Web/app/client/platforms/openai.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/template.env" beforeDir="false" afterPath="$PROJECT_DIR$/template.env" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
