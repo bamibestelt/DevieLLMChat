@@ -23,7 +23,7 @@ RSSProcessor
 build dockerfile
 docker buildx build --platform linux/amd64 -t rss-processor .
 to run rss-processor
-docker run -d --net=host rss-processor
+docker run -d --net=host bamibestelt/rss-processor
 
 environment variables to set:
 ENV RABBIT_HOST="localhost"
@@ -53,6 +53,8 @@ push a new tag to repo
 docker push bamibestelt/devies-llm-integration:tagname
 docker login
 docker pull username/image-name:tagname
+docker stop $(docker ps -q)
+
 
 
 Notes:

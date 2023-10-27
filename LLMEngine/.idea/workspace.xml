@@ -5,11 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3097ce8f-ecc6-44cc-adb1-204c3b835ee8" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/../ChatGPT-Client-Web/app/client/platforms/openai.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../ChatGPT-Client-Web/app/client/platforms/openai.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../ChatGPT-Client-Web/app/constant.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../ChatGPT-Client-Web/app/constant.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/privateGPT.py" beforeDir="false" afterPath="$PROJECT_DIR$/privateGPT.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
