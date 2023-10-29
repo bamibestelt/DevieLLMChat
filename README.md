@@ -39,6 +39,13 @@ docker run -p 8080:8080 --platform linux/amd64 --volume <host_folder>:<container
 
 
 ChatGPT-Client-Web
+setup:
+sudo apt-get remove nodejs
+sudo apt-get update
+sudo apt-get autoremove
+curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
+source ~/.profile
+nvm install 16.15.1
 run with: yarn dev.
 docker buildx build --platform linux/amd64 -t devies-chat-client .
 run docker image
