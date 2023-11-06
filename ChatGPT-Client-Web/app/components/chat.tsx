@@ -215,17 +215,10 @@ function useSubmitHandler() {
     if (e.key !== "Enter") return false;
     if (e.key === "Enter" && (e.nativeEvent.isComposing || isComposing.current))
       return false;
-    return (
-      (config.submitKey === SubmitKey.AltEnter && e.altKey) ||
-      (config.submitKey === SubmitKey.CtrlEnter && e.ctrlKey) ||
-      (config.submitKey === SubmitKey.ShiftEnter && e.shiftKey) ||
-      (config.submitKey === SubmitKey.MetaEnter && e.metaKey) ||
-      (config.submitKey === SubmitKey.Enter &&
-        !e.altKey &&
-        !e.ctrlKey &&
-        !e.shiftKey &&
-        !e.metaKey)
-    );
+    // reserve shift + enter to make new line
+    if (e.key === "Enter" && e.shiftKey)
+      return false;
+    return true;
   };
 
   return {
@@ -759,7 +752,7 @@ function _Chat() {
   // check if should send message
   const onInputKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     // if ArrowUp and no userInput, fill with last input
-    if (
+    /* if (
       e.key === "ArrowUp" &&
       userInput.length <= 0 &&
       !(e.metaKey || e.altKey || e.ctrlKey)
@@ -767,9 +760,9 @@ function _Chat() {
       setUserInput(localStorage.getItem(LAST_INPUT_KEY) ?? "");
       e.preventDefault();
       return;
-    }
+    } */
     if (shouldSubmit(e) && promptHints.length === 0) {
-      doSubmit(userInput);
+      doSubmit(userInput);// TODO
       e.preventDefault();
     }
   };

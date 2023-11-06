@@ -289,6 +289,8 @@ export class ChatGPTApi implements LLMApi {
 // simple api interface
 export class ChatClientApi implements LLMCommApi {
 
+  baseApiUrl = "http://localhost:8080/"
+
   extractMessage(res: any) {
     return res.choices?.at(0)?.message?.content ?? "";
   }
@@ -308,7 +310,7 @@ export class ChatClientApi implements LLMCommApi {
     // for the time being we only send the current prompt
     // the rest of conversation can go into chat_history in future
     const newestPrompt = (conversations.length > 0) ? conversations[conversations.length - 1] : conversations[0]
-    console.log("prompt to be sent: ", newestPrompt);
+    // console.log("prompt to be sent: ", newestPrompt);
 
     const controller = new AbortController();
     options.onController?.(controller);
@@ -320,11 +322,9 @@ export class ChatClientApi implements LLMCommApi {
 
     try {
       const chatPayload = JSON.stringify(payload);
-      let baseApiUrl = process.env.BASE_API_URL
-      baseApiUrl = baseApiUrl ? baseApiUrl : "http://51.116.124.95:8080/"
-      const apiUrl = baseApiUrl + "chat";
+      const apiUrl = this.baseApiUrl + "chat";
 
-      console.log('POST chat: ' + apiUrl);
+      //console.log('POST chat: ' + apiUrl);
       fetchEventSource(apiUrl, {
         method: "POST",
         headers: {
@@ -362,9 +362,7 @@ export class ChatClientApi implements LLMCommApi {
 
   // handle data update and show the status in the response
   async update(callback: DataUpdateCallback) {
-    let baseApiUrl = process.env.BASE_API_URL
-    baseApiUrl = baseApiUrl ? baseApiUrl : "http://51.116.124.95:8080/"
-    const apiUrl = baseApiUrl + "update";
+    const apiUrl = this.baseApiUrl + "update";
 
     console.log('POST update');
     fetchEventSource(apiUrl, {
