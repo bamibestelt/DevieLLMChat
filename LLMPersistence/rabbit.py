@@ -76,8 +76,7 @@ def start_data_update_request():
     print("start updating data")
     is_updating_data = True
     current_update_status = LLMStatusCode.START
-    blog_links_thread = threading.Thread(target=start_links_request)
-    blog_links_thread.start()
+    start_links_request()
 
 
 # send data update status to client

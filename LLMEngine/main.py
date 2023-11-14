@@ -11,7 +11,6 @@ from langchain.schema.messages import AIMessage, HumanMessage
 
 from constants import LLM_HOST_ADDRESS, LLM_PORT_ADDRESS
 from privateGPT import get_retriever, create_chain, get_llm
-from rabbit import start_data_update_request, provide_status_stream
 from utils import ChatRequest
 
 app = FastAPI()
@@ -82,8 +81,9 @@ async def chat_endpoint(request: ChatRequest):
 
 @app.post("/update")
 async def update_endpoint():
-    start_data_update_request()
-    return StreamingResponse(provide_status_stream(), media_type='text/event-stream')
+    # incoming request to update database
+    print("database updated requested")
+    return
 
 
 def start_llm_service():
