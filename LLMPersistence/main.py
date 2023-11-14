@@ -1,7 +1,7 @@
 import argparse
 
-from constants import BLOG_RSS
-from rabbit import start_data_update_request
+from constants import UPDATE_REQUEST_QUEUE
+from rabbit import consume_message, listen_to_request_queue
 
 
 def main():
@@ -9,9 +9,9 @@ def main():
     args = parse_arguments()
     if args.t:
         print("decoding from hard coded rss path")
-        start_data_update_request()
+        # start_data_update_request()
         return
-    start_data_update_request()
+    consume_message(UPDATE_REQUEST_QUEUE, listen_to_request_queue)
 
 
 def parse_arguments():

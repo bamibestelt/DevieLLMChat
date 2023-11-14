@@ -45,11 +45,15 @@ def get_llm_status(code: LLMStatusCode) -> dict:
     return status
 
 
-def parse_blog_document(links: List[str]) -> List[Document]:
-    loader = AsyncHtmlLoader(links)
-    docs = loader.load()
-    print("decoding links success")
-    return docs
+def get_status_from_code(code):
+    return {
+        0: LLMStatusCode.START,
+        1: LLMStatusCode.GET_RSS,
+        2: LLMStatusCode.PARSING,
+        3: LLMStatusCode.SAVING,
+        -1: LLMStatusCode.FINISH,
+        -2: LLMStatusCode.IDLE,
+    }.get(code, LLMStatusCode.IDLE)
 
 
 REPHRASE_TEMPLATE = """\

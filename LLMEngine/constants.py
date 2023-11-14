@@ -16,6 +16,13 @@ MODEL_N_CTX = os.environ.get('MODEL_N_CTX')
 MODEL_N_BATCH = int(os.environ.get('MODEL_N_BATCH', 8))
 TARGET_SOURCE_CHUNKS = int(os.environ.get('TARGET_SOURCE_CHUNKS', 4))
 
+RABBIT_HOST = os.environ.get('RABBIT_HOST')
+
+# rss blog links channel
+UPDATE_REQUEST_QUEUE = os.environ.get('UPDATE_REQUEST_QUEUE')
+UPDATE_STATUS_QUEUE = os.environ.get('UPDATE_STATUS_QUEUE')
+BLOG_RSS = os.environ.get('BLOG_RSS')
+
 # Define the folder for storing database
 PERSIST_DIRECTORY = os.environ.get('PERSIST_DIRECTORY')
 if PERSIST_DIRECTORY is None:

@@ -7,11 +7,10 @@ if not load_dotenv():
     print("Could not load .env file or it is empty. Please check if it exists and is readable.")
     exit(1)
 
+# RabbitMQ settings
 RABBIT_HOST = os.environ.get('RABBIT_HOST')
-
-# rss blog links channel
-BLOG_LINKS_REQUEST = os.environ.get('BLOG_REQUEST_QUEUE')
-BLOG_LINKS_REPLY = os.environ.get('BLOG_REPLY_QUEUE')
+UPDATE_REQUEST_QUEUE = os.environ.get('UPDATE_REQUEST_QUEUE')
+UPDATE_STATUS_QUEUE = os.environ.get('UPDATE_STATUS_QUEUE')
 BLOG_RSS = os.environ.get('BLOG_RSS')
 
 # Define the folder for storing database

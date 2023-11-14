@@ -2,8 +2,9 @@ DeviesLLMChat.
 A prototype of LLM integration with company data.
 
 This integration consists of 4 layers:
-1. Processors: gathers data from outside source such as blogs, links, google drive, api endpoints etc. (may need to move langchain document transformation here in the processors instead of in the LLM layer).
-2. LLM: receive data from processors, turn them into documents, persist them into vector database and allows them to be queried with prompts.
+1. Processors: focus on gathering data from various outside sources such as blogs, links, google drive, api endpoints etc. Processors will send data to Persistence component.
+2. Persistence: focus on receiving data from processors and persist them into the vector database.
+2. LLM: contains api endppoints that will be requested by frontend clients. Have direct connection to LLM binary and required higher than average computing resources.
 4. Frontend: UI interface in which user interacts with the system through prompts, commands and data. 
 
 Links for references:
@@ -62,6 +63,11 @@ docker login
 docker pull username/image-name:tagname
 docker stop $(docker ps -q)
 
+start vector database.
+docker run -p 8123:8000 -d chromadb/chroma
+
+start rabbitMQ
+docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3.12-management
 
 
 Notes:

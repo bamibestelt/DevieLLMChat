@@ -1,8 +1,6 @@
-from constants import LLM_UPDATE_QUEUE
-from rabbit import consume_message, data_update_request_receiver, publish_message
+from utils import get_status_from_code
 
 
-def test_data_update_request():
-    print('Listening to data-update request...')
-    publish_message('test', LLM_UPDATE_QUEUE)
-    consume_message(LLM_UPDATE_QUEUE, data_update_request_receiver)
+def test_get_status_from_code():
+    current_update_status = get_status_from_code(3)
+    print(f"status received: {current_update_status.name}")

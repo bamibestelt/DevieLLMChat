@@ -1,8 +1,5 @@
 from enum import Enum
 from typing import Dict, List, Optional
-
-from langchain.docstore.document import Document
-from langchain.document_loaders import AsyncHtmlLoader
 from pydantic import BaseModel
 
 
@@ -43,20 +40,3 @@ def get_llm_status(code: LLMStatusCode) -> dict:
         status_message=get_llm_status_message(code)
     )
     return status
-
-
-def parse_blog_document(links: List[str]) -> List[Document]:
-    loader = AsyncHtmlLoader(links)
-    docs = loader.load()
-    print("decoding links success")
-    return docs
-
-
-REPHRASE_TEMPLATE = """\
-Given the following conversation and a follow up question, rephrase the follow up \
-question to be a standalone question.
-
-Chat History:
-{chat_history}
-Follow Up Input: {question}
-Standalone Question:"""
