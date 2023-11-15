@@ -28,13 +28,19 @@ app.add_middleware(
 llm = None
 retriever = None
 has_initialized_llm = False
+is_llm_busy = False
 
 
 async def transform_stream_for_client(
     stream: AsyncIterator[RunLogPatch],
 ) -> AsyncIterator[str]:
+    global is_llm_busy
+    
     async for chunk in stream:
         yield f"event: data\ndata: {json.dumps(jsonable_encoder(chunk))}\n\n"
+    
+    print("STREAMING ENDED")
+    is_llm_busy = False
     yield "event: end\n\n"
 
 
@@ -43,9 +49,18 @@ async def chat_endpoint(request: ChatRequest):
     global llm
     global retriever
     global has_initialized_llm
+    global is_llm_busy
+
+    if is_llm_busy:
+        # return null response. should've handled from the frontend as well
+        return
+
+    is_llm_busy = True
+
     question = request.message
     chat_history = request.history or []
     converted_chat_history = []
+    
     for message in chat_history:
         if message.get("human") is not None:
             converted_chat_history.append(HumanMessage(content=message["human"]))
@@ -67,6 +82,7 @@ async def chat_endpoint(request: ChatRequest):
         retriever,
         use_chat_history=bool(converted_chat_history),
     )
+
     stream = answer_chain.astream_log(
         {
             "question": question,
@@ -75,6 +91,7 @@ async def chat_endpoint(request: ChatRequest):
         config={"metadata": metadata},
         include_names=["FindDocs"],
     )
+
     return StreamingResponse(
         transform_stream_for_client(stream),
         headers={"Content-Type": "text/event-stream"},

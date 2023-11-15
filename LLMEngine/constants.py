@@ -30,9 +30,12 @@ if PERSIST_DIRECTORY is None:
 
 EMBEDDINGS_MODEL_NAME = os.environ.get('EMBEDDINGS_MODEL_NAME')
 
+CHROMA_HOST = os.environ.get('CHROMA_HOST')
+CHROMA_PORT = os.environ.get('CHROMA_PORT')
+
 # Define the Chroma settings
 CHROMA_SETTINGS = Settings(
-    persist_directory=PERSIST_DIRECTORY,
+    chroma_db_impl="duckdb+parquet",
     anonymized_telemetry=False
 )
 
