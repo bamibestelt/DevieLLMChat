@@ -307,8 +307,6 @@ export class ChatClientApi implements LLMCommApi {
         }
       ));
 
-    // for the time being we only send the current prompt
-    // the rest of conversation can go into chat_history in future
     const newestPrompt = (conversations.length > 0) ? conversations[conversations.length - 1] : conversations[0]
     // console.log("prompt to be sent: ", newestPrompt);
 
@@ -317,7 +315,8 @@ export class ChatClientApi implements LLMCommApi {
 
     const payload = {
       message: newestPrompt,
-      history: chatHistory
+      history: chatHistory,
+      openai_api_key: process.env.OPENAI_API_KEY
     }
 
     try {

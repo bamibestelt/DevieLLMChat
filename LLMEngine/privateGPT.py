@@ -4,13 +4,14 @@ from typing import Sequence
 import chromadb
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.llms import GPT4All, LlamaCpp
-from langchain.prompts import (ChatPromptTemplate, PromptTemplate, MessagesPlaceholder)
+from langchain.prompts import (ChatPromptTemplate, PromptTemplate)
 from langchain.schema import Document
 from langchain.schema.language_model import BaseLanguageModel
 from langchain.schema.output_parser import StrOutputParser
 from langchain.schema.retriever import BaseRetriever
 from langchain.schema.runnable import Runnable, RunnableMap
 from langchain.vectorstores import Chroma
+from langchain.chat_models import ChatOpenAI
 
 from constants import CHROMA_HOST, CHROMA_PORT, CHROMA_SETTINGS, EMBEDDINGS_MODEL_NAME, PERSIST_DIRECTORY, TARGET_SOURCE_CHUNKS, MODEL_TYPE, \
     MODEL_N_BATCH, MODEL_N_CTX, MODEL_PATH
@@ -88,7 +89,7 @@ def create_chain(
     return _context | response_synthesizer
 
 
-def get_llm() -> BaseLanguageModel:
+def get_llm(api_key: str=None) -> BaseLanguageModel:
     llm = None
     match MODEL_TYPE:
         case "LlamaCpp":
@@ -104,4 +105,9 @@ def get_llm() -> BaseLanguageModel:
                           n_batch=MODEL_N_BATCH,
                           callbacks=[],
                           verbose=False)
+        case "OpenAI":
+            llm = ChatOpenAI(model="gpt-3.5-turbo-16k",
+                             openai_api_key=api_key,
+                             streaming=True,
+                             temperature=0)
     return llm
