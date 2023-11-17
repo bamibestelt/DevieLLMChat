@@ -315,8 +315,7 @@ export class ChatClientApi implements LLMCommApi {
 
     const payload = {
       message: newestPrompt,
-      history: chatHistory,
-      openai_api_key: process.env.OPENAI_API_KEY
+      history: chatHistory
     }
 
     try {

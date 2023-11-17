@@ -10,7 +10,6 @@ class ChatRequest(BaseModel):
     message: str
     history: Optional[List[Dict[str, str]]]
     conversation_id: Optional[str]
-    openai_api_key: Optional[str]
 
 
 class LLMStatus(BaseModel):

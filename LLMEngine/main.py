@@ -72,7 +72,7 @@ async def chat_endpoint(request: ChatRequest):
     }
 
     if not has_initialized_llm:
-        llm = get_llm(request.openai_api_key)
+        llm = get_llm()
         retriever = get_retriever()
         has_initialized_llm = True
         print('new llm created')

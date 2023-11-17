@@ -89,7 +89,7 @@ def create_chain(
     return _context | response_synthesizer
 
 
-def get_llm(api_key: str=None) -> BaseLanguageModel:
+def get_llm() -> BaseLanguageModel:
     llm = None
     match MODEL_TYPE:
         case "LlamaCpp":
@@ -107,7 +107,6 @@ def get_llm(api_key: str=None) -> BaseLanguageModel:
                           verbose=False)
         case "OpenAI":
             llm = ChatOpenAI(model="gpt-3.5-turbo-16k",
-                             openai_api_key=api_key,
                              streaming=True,
                              temperature=0)
     return llm
