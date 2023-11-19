@@ -55,7 +55,10 @@ def listen_to_request_queue(channel, method, properties, body):
     docs = parse_blog_document(links)
 
     update_current_status(LLMStatusCode.SAVING)
-    persist_documents(docs)
+    try:
+        persist_documents(docs)
+    except Exception as e:
+        print(f"saving documents failed: {e}")
 
     update_current_status(LLMStatusCode.FINISH)
 

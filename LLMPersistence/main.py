@@ -5,10 +5,10 @@ from rabbit import consume_message, listen_to_request_queue
 
 
 def main():
-    print("RSS processor starting...")
+    print("persistence service starting...")
     args = parse_arguments()
     if args.t:
-        print("decoding from hard coded rss path")
+        print("test with hard coded source")
         # start_data_update_request()
         return
     consume_message(UPDATE_REQUEST_QUEUE, listen_to_request_queue)

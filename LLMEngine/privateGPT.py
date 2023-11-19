@@ -13,7 +13,7 @@ from langchain.schema.runnable import Runnable, RunnableMap
 from langchain.vectorstores import Chroma
 from langchain.chat_models import ChatOpenAI
 
-from constants import CHROMA_HOST, CHROMA_PORT, CHROMA_SETTINGS, EMBEDDINGS_MODEL_NAME, PERSIST_DIRECTORY, TARGET_SOURCE_CHUNKS, MODEL_TYPE, \
+from constants import CHROMA_HOST, CHROMA_PORT, CHROMA_SETTINGS, EMBEDDINGS_MODEL_NAME, TARGET_SOURCE_CHUNKS, MODEL_TYPE, \
     MODEL_N_BATCH, MODEL_N_CTX, MODEL_PATH
 from utils import REPHRASE_TEMPLATE
 

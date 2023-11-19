@@ -13,11 +13,6 @@ UPDATE_REQUEST_QUEUE = os.environ.get('UPDATE_REQUEST_QUEUE')
 UPDATE_STATUS_QUEUE = os.environ.get('UPDATE_STATUS_QUEUE')
 BLOG_RSS = os.environ.get('BLOG_RSS')
 
-# Define the folder for storing database
-PERSIST_DIRECTORY = os.environ.get('PERSIST_DIRECTORY')
-if PERSIST_DIRECTORY is None:
-    raise Exception("Please set the PERSIST_DIRECTORY environment variable")
-
 EMBEDDINGS_MODEL_NAME = os.environ.get('EMBEDDINGS_MODEL_NAME')
 
 CHROMA_HOST = os.environ.get('CHROMA_HOST')

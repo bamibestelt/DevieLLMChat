@@ -67,6 +67,7 @@ def provide_status_stream():
     print(f"UpdateStatusAsyncStream: starts")
     global current_update_status
     global previous_update_status
+    global is_updating_data
     streaming_active = True
 
     while streaming_active:
@@ -78,6 +79,7 @@ def provide_status_stream():
                 yield "event: end\n\n"
                 previous_update_status = LLMStatusCode.IDLE
                 streaming_active = False
+                is_updating_data = False
             else:
                 # return the updated status
                 previous_update_status = current_update_status

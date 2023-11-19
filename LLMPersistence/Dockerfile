@@ -7,7 +7,7 @@ WORKDIR /app
 # Copy the current directory contents into the container at /app
 COPY . /app
 
-COPY deploy.env /app/.env
+COPY template.env /app/.env
 
 # upgrade pip
 RUN pip3 install --upgrade pip
@@ -16,10 +16,6 @@ RUN pip3 install --upgrade pip
 RUN pip3 install --no-cache-dir -r requirements.txt
 
 # rss blog links channel
-ENV MODEL_PATH=""
-ENV MODEL_TYPE=""
-ENV BLOG_RSS=""
-ENV OPENAI_API_KEY=""
 ENV CHROMA_HOST=""
 ENV CHROMA_PORT=""
 ENV RABBIT_HOST=""
