@@ -17,12 +17,11 @@ RUN pip3 install --no-cache-dir -r requirements.txt
 
 # rss blog links channel
 ENV MODEL_PATH=""
-ENV MODEL_TYPE=""
-ENV BLOG_RSS=""
+ENV MODEL_TYPE="OpenAI"
 ENV OPENAI_API_KEY=""
-ENV CHROMA_HOST=""
-ENV CHROMA_PORT=""
-ENV RABBIT_HOST=""
+ENV CHROMA_HOST="localhost"
+ENV CHROMA_PORT="8123"
+ENV RABBIT_HOST="localhost"
 
 EXPOSE 8080
 

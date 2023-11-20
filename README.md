@@ -20,23 +20,27 @@ CodaProcessor
 pip install playwright
 playwright install
 
-RSSProcessor
-build dockerfile
-docker buildx build --platform linux/amd64 -t rss-processor .
-to run rss-processor
-docker run -d --net=host bamibestelt/rss-processor
 
+LLMPersistence
+build dockerfile
+docker buildx build --platform linux/amd64 -t llm-persistence .
+to run rss-processor
+docker run --net=host --restart unless-stopped -d llm-persistence
 environment variables to set:
-ENV RABBIT_HOST="localhost"
-ENV RSS_LINK="https://deviesdevelopment.github.io/blog/posts/index.xml"
+ENV CHROMA_HOST=""
+ENV CHROMA_PORT=""
+ENV RABBIT_HOST=""
 
 
 LLMEngine
 build docker image with platform flag.
 docker buildx build --platform linux/amd64 -t llm-engine .
-
 run docker image with platform flag.
-docker run -p 8080:8080 --platform linux/amd64 --volume <host_folder>:<container_folder> --env MODEL_TYPE=GPT4All --env PERSIST_DIRECTORY=<container_folder>/db --env MODEL_PATH=<container_folder>/models/nous-hermes-13b.ggmlv3.q4_0.bin -d bamibestelt/llm-engine
+openai:
+docker run -p 8080:8080 --platform linux/amd64 -d llm-engine
+
+personal llm:
+docker run -p 8080:8080 --platform linux/amd64 --volume <host_folder>:<container_folder> -e MODEL_TYPE=LlamaCpp -e MODEL_PATH=<container_folder>/models/your_llm_binary.gguf -d llm-engine
 
 
 ChatGPT-Client-Web
@@ -50,7 +54,7 @@ nvm install 16.15.1
 run with: yarn dev.
 docker buildx build --platform linux/amd64 -t devies-chat-client .
 run docker image
-docker run -p 3000:3000 --env BASE_API_URL=<remote_host_name> -d devies-chat-client
+docker run -p 3000:3000 -e BASE_API_URL=<remote_host_name> -d devies-chat-client
 
 
 push new image
