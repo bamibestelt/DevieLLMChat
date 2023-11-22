@@ -17,6 +17,8 @@ MODEL_N_BATCH = int(os.environ.get('MODEL_N_BATCH', 8))
 TARGET_SOURCE_CHUNKS = int(os.environ.get('TARGET_SOURCE_CHUNKS', 4))
 
 RABBIT_HOST = os.environ.get('RABBIT_HOST')
+RABBIT_USER = os.environ.get('RABBIT_USER')
+RABBIT_PASS = os.environ.get('RABBIT_PASS')
 
 # rss blog links channel
 UPDATE_REQUEST_QUEUE = os.environ.get('UPDATE_REQUEST_QUEUE')

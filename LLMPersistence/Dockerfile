@@ -17,8 +17,10 @@ RUN pip3 install --no-cache-dir -r requirements.txt
 
 # rss blog links channel
 ENV CHROMA_HOST="localhost"
-ENV CHROMA_PORT="8123"
+ENV CHROMA_PORT="8000"
 ENV RABBIT_HOST="localhost"
+ENV RABBIT_USER=""
+ENV RABBIT_PASS=""
 
 EXPOSE 8080
 

@@ -1,9 +1,6 @@
-import json
-import time
-
 import pika
 
-from constants import UPDATE_STATUS_QUEUE, RABBIT_HOST, BLOG_RSS
+from constants import RABBIT_USER, RABBIT_PASS, UPDATE_STATUS_QUEUE, RABBIT_HOST, BLOG_RSS
 from persistence import persist_documents
 from processors.rss_processor import parse_blog_document, parse_rss_link
 from utils import LLMStatusCode
@@ -12,10 +9,16 @@ is_updating_data = False
 current_update_status = LLMStatusCode.IDLE
 
 
+def get_connection_setup():
+    credentials = pika.PlainCredentials(username=RABBIT_USER, password=RABBIT_PASS)
+    parameters = pika.ConnectionParameters(host=RABBIT_HOST, port=5672, virtual_host='/', credentials=credentials)
+    return pika.BlockingConnection(parameters)
+
+
 # send
 def publish_message(message: str, queue: str):
     bytes_msg = message.encode('utf-8')
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host=RABBIT_HOST))
+    connection = get_connection_setup()
     channel = connection.channel()
     channel.queue_declare(queue=queue)
     channel.basic_publish(exchange='', routing_key=queue, body=bytes_msg)
@@ -26,7 +29,7 @@ def publish_message(message: str, queue: str):
 
 # set to listen queue
 def consume_message(target_queue: str, target_callback: ()):
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host=RABBIT_HOST))
+    connection = get_connection_setup()
     channel = connection.channel()
     channel.queue_declare(queue=target_queue)
     channel.basic_consume(queue=target_queue, on_message_callback=target_callback, auto_ack=True)

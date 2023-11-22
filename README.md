@@ -24,26 +24,22 @@ playwright install
 LLMPersistence
 build dockerfile
 docker buildx build --platform linux/amd64 -t llm-persistence .
-to run rss-processor
+to run llm-persistence
+required image: rabbitmq chromadb
 docker run --net=host --restart unless-stopped -d llm-persistence
 environment variables to set:
 ENV CHROMA_HOST=""
 ENV CHROMA_PORT=""
 ENV RABBIT_HOST=""
+ENV RABBIT_USER=""
+ENV RABBIT_PASS=""
 
 
 LLMEngine
-build docker image with platform flag.
-docker buildx build --platform linux/amd64 -t llm-engine .
-run docker image with platform flag.
-openai:
-docker run -p 8080:8080 --platform linux/amd64 -d llm-engine
-
-personal llm:
-docker run -p 8080:8080 --platform linux/amd64 --volume <host_folder>:<container_folder> -e MODEL_TYPE=LlamaCpp -e MODEL_PATH=<container_folder>/models/your_llm_binary.gguf -d llm-engine
-
+contains logic to communicate with retriever and llm. You can choose to run it locally on you machine or use openai. Details about the parameters can be seen in "DeviesLLMChat Compose" in 1Password.
 
 ChatGPT-Client-Web
+The frontend chat client. All he knows is to communicate with LLMEngine
 setup:
 sudo apt-get remove nodejs
 sudo apt-get update
@@ -52,38 +48,12 @@ curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
 source ~/.profile
 nvm install 16.15.1
 run with: yarn dev.
-docker buildx build --platform linux/amd64 -t devies-chat-client .
-run docker image
-docker run -p 3000:3000 -e BASE_API_URL=<remote_host_name> -d devies-chat-client
-
-
-push new image
-docker tag image-name:tagname username/image-name:tagname
-docker push username/image-name:tagname
-
-push a new tag to repo
-docker push bamibestelt/devies-llm-integration:tagname
-docker login
-docker pull username/image-name:tagname
-docker stop $(docker ps -q)
-
-start vector database.
-docker run -p 8123:8000 -d chromadb/chroma
-
-start rabbitMQ
-docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3.12-management
-
-
-Notes:
-1. docker-compose is not yet tested.
 
 
 TODOs:
 1. Implement document processor for Google Drive.
 2. Implement document processor for Tools.
 3. Implement document processor and web scraping for Coda docs.
-4. Creating new LLM instance for new user session?
-5. Chaining LLMs.
 
 Tests:
 1. Performance.

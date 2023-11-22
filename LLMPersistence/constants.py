@@ -9,6 +9,8 @@ if not load_dotenv():
 
 # RabbitMQ settings
 RABBIT_HOST = os.environ.get('RABBIT_HOST')
+RABBIT_USER = os.environ.get('RABBIT_USER')
+RABBIT_PASS = os.environ.get('RABBIT_PASS')
 UPDATE_REQUEST_QUEUE = os.environ.get('UPDATE_REQUEST_QUEUE')
 UPDATE_STATUS_QUEUE = os.environ.get('UPDATE_STATUS_QUEUE')
 BLOG_RSS = os.environ.get('BLOG_RSS')
