@@ -7,9 +7,10 @@ This integration consists of:
 
 
 ## How to use
-1. Download **.env** file from **1Password** and put it inside **LLMEngine**.
-2. You can use llm file to run the app locally for free. Download the llm file from [GPT4All website](https://gpt4all.io/index.html) then copy the llm file into **./LLMEngine/models**. My recommendation is **mistral-7b-instruct** or **nous-hermes**. You can also use your **OpenAI** API key to communicate with an OpenAI backend.
-3. Get inside the **executable** folder and run the run.sh file.
+1. Download **devies-llm-chat.tar.gz** from the Release.
+2. Download **.env** file from **DeviesLLMChat** section in **1Password** and put it inside **LLMEngine** folder.
+3. You can use llm file to run the app locally for free. Download the llm file from [GPT4All website](https://gpt4all.io/index.html) then copy the llm file into **./LLMEngine/models**. My recommendation is **mistral-7b-instruct** or **nous-hermes**. You can also use your **OpenAI** API key to communicate with an OpenAI backend.
+4. Get inside the **executable** folder and run the run.sh file. It will try to install all the dependencies for the first time.
 
 
 ## Components

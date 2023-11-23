@@ -6,6 +6,7 @@ llm_engine_dir="../LLMEngine/"
 chat_client_dir="../ChatGPT-Client-Web/"
 llm_engine_dependency="${llm_engine_dir}/.venv"
 
+
 # first check if we already have the virtual environment
 if [ -d "$llm_engine_dependency" ]; then
     echo "Dependency installed proceed to run the project."
@@ -43,8 +44,9 @@ else
 
 	# install requirements
 	echo "Installing Python requirements..."
-	pip install --no-cache-dir -r requirements.txt
+	pip install --no-cache-dir -r "${llm_engine_dir}/requirements.txt"
 fi
+
 
 # run the llm engine
 source ../LLMEngine/.venv/bin/activate
