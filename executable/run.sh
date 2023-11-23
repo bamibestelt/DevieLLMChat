@@ -43,7 +43,7 @@ else
 
 	# install requirements
 	echo "Installing Python requirements..."
-	RUN pip3 install --no-cache-dir -r requirements.txt
+	pip install --no-cache-dir -r requirements.txt
 fi
 
 # run the llm engine
