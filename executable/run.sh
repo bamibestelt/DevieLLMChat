@@ -42,7 +42,7 @@ else
 	echo "Upgrading pip..."
 	python3 -m pip install --upgrade pip
 
-	# install requirements
+	# Install requirements
 	echo "Installing Python requirements..."
 	pip install --no-cache-dir -r "${llm_engine_dir}/requirements.txt"
 fi
