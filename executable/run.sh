@@ -44,10 +44,12 @@ fi
 
 # run the llm engine
 source ../LLMEngine/.venv/bin/activate
-python ../LLMEngine/main.py
+python ../LLMEngine/main.py &
 
 
 # run chat client
-cd chat_client_dir
+cd $chat_client_dir
 yarn build
 yarn start
+
+wait

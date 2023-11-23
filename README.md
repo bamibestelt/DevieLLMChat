@@ -8,8 +8,8 @@ This integration consists of:
 
 ## How to use
 1. Download **.env** file from **1Password** and put it inside **LLMEngine**.
-2. You can use llm file if you want to run the app locally without outside connection or use your **OpenAI** API key to communicate with your OpenAI subscription. To download llm file go to [GPT4All website](https://gpt4all.io/index.html) my recommendation is **mistral-7b-instruct** or **nous-hermes**.
-3. Run run.sh in the executable folder.
+2. You can use llm file to run the app locally for free. Download the llm file from [GPT4All website](https://gpt4all.io/index.html) then copy the llm file into **./LLMEngine/models**. My recommendation is **mistral-7b-instruct** or **nous-hermes**. You can also use your **OpenAI** API key to communicate with an OpenAI backend.
+3. Get inside the **executable** folder and run the run.sh file.
 
 
 ## Components
