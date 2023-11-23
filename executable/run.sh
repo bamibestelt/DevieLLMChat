@@ -35,11 +35,15 @@ else
 	    curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 	    python3 get-pip.py
 	    rm get-pip.py
-
-	    # Upgrade pip
-		echo "Upgrading pip..."
-		python3 -m pip install --upgrade pip
 	fi
+
+	# Upgrade pip
+	echo "Upgrading pip..."
+	python3 -m pip install --upgrade pip
+
+	# install requirements
+	echo "Installing Python requirements..."
+	RUN pip3 install --no-cache-dir -r requirements.txt
 fi
 
 # run the llm engine
