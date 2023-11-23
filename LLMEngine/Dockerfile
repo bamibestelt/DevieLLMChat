@@ -7,7 +7,7 @@ WORKDIR /app
 # Copy the current directory contents into the container at /app
 COPY . /app
 
-COPY deploy.env /app/.env
+COPY template.env /app/.env
 
 # upgrade pip
 RUN pip3 install --upgrade pip

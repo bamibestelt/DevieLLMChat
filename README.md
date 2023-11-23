@@ -7,6 +7,12 @@ This integration consists of 4 layers:
 2. LLM: contains api endppoints that will be requested by frontend clients. Have direct connection to LLM binary and required higher than average computing resources.
 4. Frontend: UI interface in which user interacts with the system through prompts, commands and data. 
 
+How to use:
+1. Download .env file from 1Password and put it inside LLMEngine.
+2. You can use llm binary if you want to run the app locally without outside connection or use you openai api key IF YOU WANT TO SHARE YOUR DATA WITH THEM >=). To download llm file go to https://gpt4all.io/index.html my recommendation is mistral-7b-instruct or nous-hermes.
+2. Run run.sh in executable folder.
+
+
 Links for references:
 https://github.com/imartinez/privateGPT
 https://github.com/langchain-ai/langchain
