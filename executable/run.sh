@@ -49,7 +49,7 @@ python ../LLMEngine/main.py &
 
 # run chat client
 cd $chat_client_dir
-yarn build
+# yarn build
 yarn start
 
 wait
