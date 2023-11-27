@@ -40,7 +40,7 @@ required: rabbitmq chromadb
 ### LLMEngine
 contains logic to communicate with retriever and llm. You can choose to run it locally on you machine or use OpenAI. Details about the parameters can be seen in **DeviesLLMChat Compose** in **1Password**.
 
-docker run -p 8080:8080 -e OPENAI_API_KEY=sk-xxxx --restart unless-stopped -d llm-engine
+docker run -p 8080:8080 -e OPENAI_API_KEY=sk-xxxx --restart unless-stopped -d bamibestelt/llm-engine
 
 
 ### ChatGPT-Client-Web
