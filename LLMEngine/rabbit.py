@@ -3,7 +3,7 @@ import time
 
 from constants import BLOG_RSS
 from persistence import persist_documents
-from processors.rss_processor import parse_blog_document, parse_rss_link
+from processors.rss_processor import parse_blog_document, parse_devies_site, parse_rss_link
 from utils import LLMStatusCode, get_llm_status, get_status_from_code
 
 is_updating_data = False
@@ -21,22 +21,24 @@ def start_data_update_request():
     is_updating_data = True
     print("start updating data")
 
-    current_update_status = get_status_from_code(LLMStatusCode.START)
+    current_update_status = get_status_from_code(0)
     # rss_link = body.decode('utf-8')
     
-    current_update_status = get_status_from_code(LLMStatusCode.GET_RSS)
+    current_update_status = get_status_from_code(1)
     links = parse_rss_link(BLOG_RSS)
     
-    current_update_status = get_status_from_code(LLMStatusCode.PARSING)
+    current_update_status = get_status_from_code(2)
     docs = parse_blog_document(links)
+    docs += parse_devies_site()
+    print(f"total docs processed: {len(docs)}")
 
-    current_update_status = get_status_from_code(LLMStatusCode.SAVING)
+    current_update_status = get_status_from_code(3)
     try:
         persist_documents(docs)
     except Exception as e:
         print(f"saving documents failed: {e}")
 
-    current_update_status = get_status_from_code(LLMStatusCode.FINISH)
+    current_update_status = get_status_from_code(-1)
     is_updating_data = False
 
 
