@@ -1,42 +1,14 @@
 import json
-import threading
 import time
 
-import pika
-from constants import BLOG_RSS, RABBIT_HOST, RABBIT_USER, RABBIT_PASS, UPDATE_REQUEST_QUEUE, UPDATE_STATUS_QUEUE
-
+from constants import BLOG_RSS
+from persistence import persist_documents
+from processors.rss_processor import parse_blog_document, parse_rss_link
 from utils import LLMStatusCode, get_llm_status, get_status_from_code
 
 is_updating_data = False
 current_update_status = LLMStatusCode.IDLE
 previous_update_status = LLMStatusCode.IDLE
-
-
-def get_connection_setup():
-    credentials = pika.PlainCredentials(username=RABBIT_USER, password=RABBIT_PASS)
-    parameters = pika.ConnectionParameters(host=RABBIT_HOST, port=5672, virtual_host='/', credentials=credentials)
-    return pika.BlockingConnection(parameters)
-
-
-# send
-def publish_message(message: str, queue: str):
-    bytes_msg = message.encode('utf-8')
-    connection = get_connection_setup()
-    channel = connection.channel()
-    channel.queue_declare(queue=queue)
-    channel.basic_publish(exchange='', routing_key=queue, body=bytes_msg)
-    print(f"message {message} is sent to {queue}")
-    channel.close()
-    connection.close()
-
-
-# set to listen queue
-def consume_message(target_queue: str, target_callback: ()):
-    connection = get_connection_setup()
-    channel = connection.channel()
-    channel.queue_declare(queue=target_queue)
-    channel.basic_consume(queue=target_queue, on_message_callback=target_callback, auto_ack=True)
-    channel.start_consuming()
 
 
 def start_data_update_request():
@@ -45,28 +17,27 @@ def start_data_update_request():
     if is_updating_data:
         print("llm engine is still busy persisting data")
         return provide_status_stream()
-    print("start updating data")
+    
     is_updating_data = True
-    current_update_status = LLMStatusCode.START
-    blog_links_thread = threading.Thread(target=start_links_request)
-    blog_links_thread.start()
+    print("start updating data")
 
+    current_update_status = get_status_from_code(LLMStatusCode.START)
+    # rss_link = body.decode('utf-8')
+    
+    current_update_status = get_status_from_code(LLMStatusCode.GET_RSS)
+    links = parse_rss_link(BLOG_RSS)
+    
+    current_update_status = get_status_from_code(LLMStatusCode.PARSING)
+    docs = parse_blog_document(links)
 
-def start_links_request():
-    publish_message(BLOG_RSS, UPDATE_REQUEST_QUEUE)
-    print('Listening to persistence status')
-    consume_message(UPDATE_STATUS_QUEUE, status_receiver)
+    current_update_status = get_status_from_code(LLMStatusCode.SAVING)
+    try:
+        persist_documents(docs)
+    except Exception as e:
+        print(f"saving documents failed: {e}")
 
-
-def status_receiver(channel, method, properties, body):
-    global current_update_status
-
-    status_code = int(body.decode('utf-8'))
-    current_update_status = get_status_from_code(status_code)
-    print(f"status received: {current_update_status.name}")
-
-    if current_update_status == LLMStatusCode.FINISH:
-        channel.stop_consuming()
+    current_update_status = get_status_from_code(LLMStatusCode.FINISH)
+    is_updating_data = False
 
 
 def provide_status_stream():

@@ -1,5 +1,6 @@
 import argparse
 import json
+import threading
 from typing import AsyncIterator
 
 from fastapi import FastAPI
@@ -100,7 +101,8 @@ async def chat_endpoint(request: ChatRequest):
 
 @app.post("/update")
 async def update_endpoint():
-    start_data_update_request()
+    blog_links_thread = threading.Thread(target=start_data_update_request)
+    blog_links_thread.start()
     return StreamingResponse(provide_status_stream(), media_type='text/event-stream')
 
 

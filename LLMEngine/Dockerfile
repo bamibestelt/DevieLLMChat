@@ -16,14 +16,8 @@ RUN pip3 install --upgrade pip
 RUN pip3 install --no-cache-dir -r requirements.txt
 
 # rss blog links channel
-ENV MODEL_PATH=""
-ENV MODEL_TYPE="LlamaCpp"
+ENV MODEL_TYPE="OpenAI"
 ENV OPENAI_API_KEY=""
-ENV CHROMA_HOST="localhost"
-ENV CHROMA_PORT=""
-ENV RABBIT_HOST="localhost"
-ENV RABBIT_USER=""
-ENV RABBIT_PASS=""
 
 EXPOSE 8080
 

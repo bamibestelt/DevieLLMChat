@@ -7,15 +7,15 @@ from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import Chroma
 
-from constants import CHROMA_HOST, CHROMA_PORT, CHROMA_SETTINGS, EMBEDDINGS_MODEL_NAME, CHUNK_SIZE, CHUNK_OVERLAP
+from constants import PERSIST_DIRECTORY, CHROMA_SETTINGS, EMBEDDINGS_MODEL_NAME, CHUNK_SIZE, CHUNK_OVERLAP
 
 
-def does_vectorstore_exist(embeddings: HuggingFaceEmbeddings, chroma_client: API) -> bool:
+def does_vectorstore_exist(embeddings: HuggingFaceEmbeddings) -> bool:
     """
     Checks if vectorstore exists
     """
-    db = Chroma(embedding_function=embeddings,
-                client=chroma_client)
+    db = Chroma(persist_directory=PERSIST_DIRECTORY, 
+                embedding_function=embeddings)
     if not db.get()['documents']:
         return False
     return True
@@ -52,13 +52,14 @@ def persist_documents(texts: List[Document]):
     # Create embeddings
     embeddings = HuggingFaceEmbeddings(model_name=EMBEDDINGS_MODEL_NAME)
     # Chroma client
-    chroma_client = chromadb.HttpClient(host=CHROMA_HOST, port=CHROMA_PORT)
+    chroma_client = chromadb.PersistentClient(path=PERSIST_DIRECTORY)
 
-    if does_vectorstore_exist(embeddings, chroma_client):
+    if does_vectorstore_exist(embeddings):
         # Update and store locally vectorstore
         print(f"Appending to existing vectorstore at localhost")
-        db = Chroma(embedding_function=embeddings,
+        db = Chroma(persist_directory=PERSIST_DIRECTORY,
                     client_settings=CHROMA_SETTINGS,
+                    embedding_function=embeddings,
                     client=chroma_client)
         print(f"Creating embeddings. May take some minutes...")
         collection = db.get()
@@ -75,8 +76,9 @@ def persist_documents(texts: List[Document]):
         print(f"Creating embeddings. May take some minutes...")
         batched_chromadb_insertions = batch_chromadb_insertions(chroma_client, documents)
         first_insertion = next(batched_chromadb_insertions)
-        db = Chroma.from_documents(first_insertion, 
-                                   embeddings,
+        db = Chroma.from_documents(documents=first_insertion, 
+                                   embedding=embeddings,
+                                   persist_directory=PERSIST_DIRECTORY,
                                    client_settings=CHROMA_SETTINGS,
                                    client=chroma_client)
         # Add the rest of batches of documents

@@ -13,7 +13,7 @@ from langchain.schema.runnable import Runnable, RunnableMap
 from langchain.vectorstores import Chroma
 from langchain.chat_models import ChatOpenAI
 
-from constants import CHROMA_HOST, CHROMA_PORT, CHROMA_SETTINGS, EMBEDDINGS_MODEL_NAME, TARGET_SOURCE_CHUNKS, MODEL_TYPE, \
+from constants import PERSIST_DIRECTORY, CHROMA_SETTINGS, EMBEDDINGS_MODEL_NAME, TARGET_SOURCE_CHUNKS, MODEL_TYPE, \
     MODEL_N_BATCH, MODEL_N_CTX, MODEL_PATH
 from utils import REPHRASE_TEMPLATE
 
@@ -22,9 +22,10 @@ def get_retriever() -> BaseRetriever:
     embeddings = HuggingFaceEmbeddings(model_name=EMBEDDINGS_MODEL_NAME)
     print('embeddings obtained...')
 
-    chroma_client = chromadb.HttpClient(host=CHROMA_HOST, port=CHROMA_PORT)
-    db = Chroma(embedding_function=embeddings, 
+    chroma_client = chromadb.PersistentClient(path=PERSIST_DIRECTORY)
+    db = Chroma(persist_directory=PERSIST_DIRECTORY,
                 client_settings=CHROMA_SETTINGS,
+                embedding_function=embeddings,
                 client=chroma_client)
     print('chromadb client obtained...')
     retriever = db.as_retriever(search_kwargs={"k": TARGET_SOURCE_CHUNKS})

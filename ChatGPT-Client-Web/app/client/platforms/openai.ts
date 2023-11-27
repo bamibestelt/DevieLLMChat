@@ -289,7 +289,7 @@ export class ChatGPTApi implements LLMApi {
 // simple api interface
 export class ChatClientApi implements LLMCommApi {
 
-  baseApiUrl = "http://localhost:8080/"
+  baseApiUrl = "http://51.116.105.24:8080/"
 
   extractMessage(res: any) {
     return res.choices?.at(0)?.message?.content ?? "";
@@ -321,6 +321,8 @@ export class ChatClientApi implements LLMCommApi {
     try {
       const chatPayload = JSON.stringify(payload);
       const apiUrl = this.baseApiUrl + "chat";
+      let latest = ""
+      let temp = ""
 
       //console.log('POST chat: ' + apiUrl);
       fetchEventSource(apiUrl, {
@@ -347,7 +349,11 @@ export class ChatClientApi implements LLMCommApi {
 
             if (content.path === '/final_output') {
               console.log('finish content');
-              options.onFinish(checkValueType(answer));
+              options.onFinish(temp);
+            } else if (content.path === '/streamed_output/-') {
+              temp = checkValueType(answer)
+              latest += temp
+              options.onUpdate(latest, '')
             }
           }
         },
