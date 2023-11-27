@@ -16,7 +16,7 @@ RUN pip3 install --upgrade pip
 RUN pip3 install --no-cache-dir -r requirements.txt
 
 # rss blog links channel
-ENV MODEL_TYPE="OpenAI"
+ENV MODEL_TYPE=""
 ENV OPENAI_API_KEY=""
 
 EXPOSE 8080
