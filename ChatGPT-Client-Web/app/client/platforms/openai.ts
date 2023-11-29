@@ -289,7 +289,7 @@ export class ChatGPTApi implements LLMApi {
 // simple api interface
 export class ChatClientApi implements LLMCommApi {
 
-  baseApiUrl = "http://51.116.105.24:8080/"
+  baseApiUrl = "http://localhost:8080/"
 
   extractMessage(res: any) {
     return res.choices?.at(0)?.message?.content ?? "";
