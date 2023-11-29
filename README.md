@@ -1,9 +1,8 @@
 ﻿# DeviesLLMChat!
 ## Introduction
 This integration consists of:
-1. **LLMPersistence**: contains processor modules to process data from website, api, webscraping etc and persist them into the vector database.
-2. **LLMEngine**: receive http requests of prompts, contains logic to create and utilize LLM to respond to the prompt.
-3. **Chat Client**: the UI interface where user can chat with the LLMEngine. 
+1. **LLMEngine**: receive http requests of prompts, contains logic to create and utilize LLM to respond to the prompt. contains processor modules to process data from website, api, webscraping etc and persist them into the vector database.
+2. **Chat Client**: the UI interface where user can chat with the LLMEngine. 
 
 
 ## How to use
@@ -19,28 +18,12 @@ This integration consists of:
     pip install playwright
     playwright install
 
-### LLMPersistence
-    build dockerfile
-    docker buildx build --platform linux/amd64 -t llm-persistence .
-
-**run llm-persistence:**
-required: rabbitmq chromadb
-
-    docker run --net=host --restart unless-stopped -d llm-persistence
-
-**environment variables to set:**
-
-    ENV CHROMA_HOST=""
-    ENV CHROMA_PORT=""
-    ENV RABBIT_HOST=""
-    ENV RABBIT_USER=""
-    ENV RABBIT_PASS=""
-
 
 ### LLMEngine
 contains logic to communicate with retriever and llm. You can choose to run it locally on you machine or use OpenAI. Details about the parameters can be seen in **DeviesLLMChat Compose** in **1Password**.
 
-docker run -p 8080:8080 -e OPENAI_API_KEY=sk-xxxx --restart unless-stopped -d bamibestelt/llm-engine
+    docker buildx build --platform linux/amd64 -t llm-engine .
+    docker run -p 8080:8080 -e OPENAI_API_KEY=sk-xxxx --restart unless-stopped -d bamibestelt/llm-engine
 
 
 ### ChatGPT-Client-Web
@@ -55,7 +38,9 @@ setup:
     nvm install 16.15.1
     run with: yarn dev.
 
-docker run -p 3000:3000 --restart unless-stopped -d devies-llm-chat
+    docker buildx build -t devies-llm-chat .
+    docker run -p 3000:3000 --restart unless-stopped -d devies-llm-chat
+
 
 ## TODOs:
 1. Implement document processor for Google Drive.
