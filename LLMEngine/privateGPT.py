@@ -4,7 +4,7 @@ from typing import Sequence
 import chromadb
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.llms import GPT4All, LlamaCpp
-from langchain.prompts import (ChatPromptTemplate, PromptTemplate)
+from langchain.prompts import (ChatPromptTemplate, MessagesPlaceholder, PromptTemplate)
 from langchain.schema import Document
 from langchain.schema.language_model import BaseLanguageModel
 from langchain.schema.output_parser import StrOutputParser
@@ -13,18 +13,19 @@ from langchain.schema.runnable import Runnable, RunnableMap
 from langchain.vectorstores import Chroma
 from langchain.chat_models import ChatOpenAI
 
-from constants import CHROMA_HOST, CHROMA_PORT, CHROMA_SETTINGS, EMBEDDINGS_MODEL_NAME, TARGET_SOURCE_CHUNKS, MODEL_TYPE, \
+from constants import PERSIST_DIRECTORY, CHROMA_SETTINGS, EMBEDDINGS_MODEL_NAME, TARGET_SOURCE_CHUNKS, MODEL_TYPE, \
     MODEL_N_BATCH, MODEL_N_CTX, MODEL_PATH
-from utils import REPHRASE_TEMPLATE
+from utils import REPHRASE_TEMPLATE, RESPONSE_TEMPLATE
 
 
 def get_retriever() -> BaseRetriever:
     embeddings = HuggingFaceEmbeddings(model_name=EMBEDDINGS_MODEL_NAME)
     print('embeddings obtained...')
 
-    chroma_client = chromadb.HttpClient(host=CHROMA_HOST, port=CHROMA_PORT)
-    db = Chroma(embedding_function=embeddings, 
+    chroma_client = chromadb.PersistentClient(path=PERSIST_DIRECTORY)
+    db = Chroma(persist_directory=PERSIST_DIRECTORY,
                 client_settings=CHROMA_SETTINGS,
+                embedding_function=embeddings,
                 client=chroma_client)
     print('chromadb client obtained...')
     retriever = db.as_retriever(search_kwargs={"k": TARGET_SOURCE_CHUNKS})
@@ -80,6 +81,8 @@ def create_chain(
     ).with_config(run_name="RetrieveDocs")
     prompt = ChatPromptTemplate.from_messages(
         [
+            ("system", RESPONSE_TEMPLATE),
+            MessagesPlaceholder(variable_name="chat_history"),
             ("human", "{question}"),
         ]
     )
@@ -108,5 +111,5 @@ def get_llm() -> BaseLanguageModel:
         case "OpenAI":
             llm = ChatOpenAI(model="gpt-3.5-turbo-16k",
                              streaming=True,
-                             temperature=0)
+                             temperature=0.3)
     return llm

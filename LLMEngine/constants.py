@@ -16,23 +16,17 @@ MODEL_N_CTX = os.environ.get('MODEL_N_CTX')
 MODEL_N_BATCH = int(os.environ.get('MODEL_N_BATCH', 8))
 TARGET_SOURCE_CHUNKS = int(os.environ.get('TARGET_SOURCE_CHUNKS', 4))
 
-RABBIT_HOST = os.environ.get('RABBIT_HOST')
-RABBIT_USER = os.environ.get('RABBIT_USER')
-RABBIT_PASS = os.environ.get('RABBIT_PASS')
-
-# rss blog links channel
-UPDATE_REQUEST_QUEUE = os.environ.get('UPDATE_REQUEST_QUEUE')
-UPDATE_STATUS_QUEUE = os.environ.get('UPDATE_STATUS_QUEUE')
 BLOG_RSS = os.environ.get('BLOG_RSS')
-
 EMBEDDINGS_MODEL_NAME = os.environ.get('EMBEDDINGS_MODEL_NAME')
 
-CHROMA_HOST = os.environ.get('CHROMA_HOST')
-CHROMA_PORT = os.environ.get('CHROMA_PORT')
+# Define the folder for storing database
+PERSIST_DIRECTORY = os.environ.get('PERSIST_DIRECTORY')
+if PERSIST_DIRECTORY is None:
+    raise Exception("Please set the PERSIST_DIRECTORY environment variable")
 
 # Define the Chroma settings
 CHROMA_SETTINGS = Settings(
-    chroma_db_impl="duckdb+parquet",
+    persist_directory=PERSIST_DIRECTORY,
     anonymized_telemetry=False
 )
 

@@ -40,6 +40,8 @@ required: rabbitmq chromadb
 ### LLMEngine
 contains logic to communicate with retriever and llm. You can choose to run it locally on you machine or use OpenAI. Details about the parameters can be seen in **DeviesLLMChat Compose** in **1Password**.
 
+docker run -p 8080:8080 -e OPENAI_API_KEY=sk-xxxx --restart unless-stopped -d bamibestelt/llm-engine
+
 
 ### ChatGPT-Client-Web
 The frontend chat client. All he knows is to communicate with the LLMEngine
@@ -53,6 +55,7 @@ setup:
     nvm install 16.15.1
     run with: yarn dev.
 
+docker run -p 3000:3000 --restart unless-stopped -d devies-llm-chat
 
 ## TODOs:
 1. Implement document processor for Google Drive.

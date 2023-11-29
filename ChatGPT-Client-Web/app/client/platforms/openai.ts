@@ -321,6 +321,8 @@ export class ChatClientApi implements LLMCommApi {
     try {
       const chatPayload = JSON.stringify(payload);
       const apiUrl = this.baseApiUrl + "chat";
+      let latest = ""
+      let temp = ""
 
       //console.log('POST chat: ' + apiUrl);
       fetchEventSource(apiUrl, {
@@ -347,7 +349,11 @@ export class ChatClientApi implements LLMCommApi {
 
             if (content.path === '/final_output') {
               console.log('finish content');
-              options.onFinish(checkValueType(answer));
+              options.onFinish(temp);
+            } else if (content.path === '/streamed_output/-') {
+              temp = checkValueType(answer)
+              latest += temp
+              options.onUpdate(latest, '')
             }
           }
         },
